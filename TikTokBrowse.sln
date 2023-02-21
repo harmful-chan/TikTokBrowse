@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.33130.400
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TikTokBrowse", "TikTokBrowse\TikTokBrowse.csproj", "{EF8EF584-090B-44E3-9DB4-C673EF4EE4CD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TikTokBrowse.Test", "TikTokBrowse.Test\TikTokBrowse.Test.csproj", "{DBF27E87-9EB1-4E5C-9FD7-97D9936E0B0D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{EF8EF584-090B-44E3-9DB4-C673EF4EE4CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF8EF584-090B-44E3-9DB4-C673EF4EE4CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF8EF584-090B-44E3-9DB4-C673EF4EE4CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBF27E87-9EB1-4E5C-9FD7-97D9936E0B0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBF27E87-9EB1-4E5C-9FD7-97D9936E0B0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBF27E87-9EB1-4E5C-9FD7-97D9936E0B0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBF27E87-9EB1-4E5C-9FD7-97D9936E0B0D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

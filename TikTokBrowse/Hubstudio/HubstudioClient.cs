@@ -1,34 +1,71 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Interactions;
 using TikTokBrowse.Hubstudio.Models;
 
 namespace TikTokBrowse.Hubstudio
 {
     public class HubstudioClient
     {
-        Process _hubstudioConnector;
-        readonly string _serverMode = "http";
-        readonly string _httpPort = "6873";
-        readonly string _appId = "202301301069736085241851904";
-        readonly string _groupCode = "11429245";
-        readonly string _appSecret = "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCofkuihJVYOIA2GNV13qjck15jgmKMTehykrJWFYIqhJZVEnX7muOX47vmMYy4xp4VO40ruBseVGJ9QNb1dNn+HSH3qEKtrq6M7tDSDCC+ct6CCFqF32gscjyhfHPXm/afM8krtiGB4/U2PNyEpSpYG12V2Fc4eLiobl6Bfp/iqOYlVW7rT/B5khsJ7zV5ihLneiS9a6niwwzD0uCRIK5g4d8CbqjHbYGofc3TBr7fCHktCbwhD91q9J+qLySrXvT3emVTSIr/SL4BeNn8wJYCZ8ZA13/zRWBRA8+7+AQ486rIpT4ORothK7xGctp/7WKUoe7tvINd2/OAQI3AVy4RAgMBAAECggEAP+gPFegFoP1lG5+Vruwxzd+TSFjWufJ+vJ4JR/9GbIv3XPLwjuqzchOtW+TlQ9wJb3Iz3CYrGvjUlj82iMi2Odyg2ocWKzv69ndJ+rEg5js5S8aRVv9iSqFVf8ZtRZThGIcSwSKGWPa2NckltqXShrJyb3grtL6NA01BSQpW6Ceb8sEnlWZtiFfbp/4P0ockmbYYbDnU2XK66HGMWXoNYw/s6zjfMBgDO1beoaaAiV8dWzcI6Zfg9N5w/VquAB48GFuJERrZuar+KeCNUZ2cJ5bWLhha+SsobnXhwyQDLzl0SUj1e6h+3m6H93MoUtzDMWCn9vbRZsXXba9NF2leAQKBgQDU3Xj1T2SDxYGRdZzXVYZ0AM8A2BW6JnVnLmbd+e3+3mJ4t/SNbfKcsvZdYmjVn1IVYMSc7eNshXfBj5bozjv2w7tvbjie1j/DCKXIzb6bt0Rwj4Qiw10kLpF6SYqNwCmyfGSBA4JNThv7PtHO8BL4e4jSEznm0qjcp9Epl03VIQKBgQDKowFp6wkl4VBhX70JE27p1mD3UaBIlNT4h4DeF01PRotjQFBpocQbILN3pM9ya94TB83RZ+ARpPim0koXpQabY2cd458HEOW39/ZZYzawnPE+Q2ujSVLSizQyuqf6U4qgWQ1JmGB2EgRpK4T+RrBXw7jAqWBX3/UEANnP67ZK8QKBgCAE2Gb99D6l/OFmcZsqcDkOzhRwbIQ9uLc2kZ6eM6B8zw8djJmhijbr7IcLgH1xo6U3kxuP5P+z69mfwbFvJDHwK0eNqtKpo5mwuU9FM4C0xoSv8c5Q2LfSkWt1mHPODfedInkNkBIUx7y5LFIWZqQd4OzIm5MO6PuX+qxo5/pBAoGAObuXe4XrZU98h0GvqhZPU3Aw0EYBVKySwPxaSux4qk1/CRgZ0P610MTQXRYnxIHXE7T1fuQJgv1tmpnvYi0yZLM9fdaMSIcX7AJJvc32lvsgAI1U7YDGiBYBGTL1CO0kYer9TiqL0RfxCcXMbmXVeCvbR4j6Wg8Ez88uP374wQECgYA2X10p/1rUD4EavElJlhd6U4XlwCq/bd3reLh73aNYPQBjgukEcBl/my4bZGdbA6a+ydSwkH1rXXDfeYTeziabKeZZH2QQ98xQrgzpBqF6+7LvV+7YiN7yJR9qTvphlGQEQQDlC/t8AP5TZcAq8zvHirNt6fZx2kNi82kYDlmWHQ==";
-        readonly string _localAddress = @"http://127.0.0.1:6873";
-
+        private Process _hubstudioConnector;
+        private string _serverMode;
+        private int _httpPort;
+        private string _appId;
+        private string _groupCode;
+        private string _appSecret;
+        private string _localAddress;
+        private string _connectorFileName;        
+        private ConcurrentDictionary<string, WorkStatus> _workStatusInfo = new ConcurrentDictionary<string, WorkStatus>();
+        private ConcurrentDictionary<int, string[]> _workArea = new ConcurrentDictionary<int, string[]>();
+        public delegate void ActuatorEventDelegate(TikTokActuator actuator);
+        public delegate void CycleActuatorEventDelegate(TikTokActuator actuator, ref bool isContinue, ref int count);
         public bool IsOpenConnector { get; private set; }
-        public HubstudioClient()
+        public bool IsWork(string containerCode)
         {
-
+            return _workStatusInfo.ContainsKey(containerCode);
         }
 
-        public void OpenConnector(string connectorFileName)
+        private int _screenCount;
+        private int _screenContainerCount;
+        public HubstudioClient(string connectorFileName, Secret appSecret)
+        {
+            _connectorFileName = connectorFileName;
+            _serverMode = appSecret.ServerMode;
+            _httpPort = appSecret.HttpPort;
+            _appId = appSecret.AppId;
+            _groupCode = appSecret.GroupCode;
+            _appSecret = appSecret.AppSecret;
+            _localAddress = $"http://127.0.0.1:{_httpPort}";
+
+            _screenCount = Screen.AllScreens.Count();
+            _screenContainerCount = 10; // 2行，每行5个
+            
+            for (int i = 0; i < _screenCount; i++)
+            {
+                _workArea[i] = new string[_screenContainerCount];
+            }
+            
+            
+            ThreadPool.SetMaxThreads(10, 10);
+        }
+
+
+        #region 连接器
+        public async Task<bool> OpenConnectorAsync()
         {
             try
             {
@@ -43,7 +80,7 @@ namespace TikTokBrowse.Hubstudio
                     else
                     {
                         _hubstudioConnector = new Process();
-                        _hubstudioConnector.StartInfo.FileName = connectorFileName;
+                        _hubstudioConnector.StartInfo.FileName = _connectorFileName;
                         //_hubstudioConnect.StartInfo.RedirectStandardInput = true;
                         //_hubstudioConnect.StartInfo.RedirectStandardOutput = true;
                         //_hubstudioConnect.StartInfo.StandardOutputEncoding = Encoding.UTF8;
@@ -55,7 +92,24 @@ namespace TikTokBrowse.Hubstudio
                         //_hubstudioConnect.BeginOutputReadLine();
                         //_hubstudioConnect.WaitForExit();
                     }
-                    IsOpenConnector = true;
+
+
+                    // 等待端口可用
+                    return await Task.Run(async ()=>
+                    {
+                        while (true)
+                        {
+                            double time = await Tcping.Ping5Async("127.0.0.1", _httpPort, 2);
+                            if (time < 1000.00)
+                            {
+                                IsOpenConnector = true;
+                                return true;
+                            }
+                            Thread.Sleep(1000);
+                        }
+                    });
+
+
                 }
             }
             catch (Exception ex)
@@ -63,9 +117,11 @@ namespace TikTokBrowse.Hubstudio
                 IsOpenConnector = false;
                 throw ex;
             }
+
+            return false;
         }
 
-        public void KillConnector()
+        public bool KillConnector()
         {
             try
             {
@@ -80,52 +136,89 @@ namespace TikTokBrowse.Hubstudio
                         processes[i].Kill();
                     }
                     IsOpenConnector = false;
+                    return true;
                 }
             }
             catch (Exception ex)
             {
-                throw ex;
+                
             }
+            return false;
         }
+        #endregion
 
-
+        #region API接口
         public async Task<Group[]> GetGroupsAsync()
         {
             return await JsonRequestAsync<Group[]>($"{_localAddress}/api/v1/group/list", null, ".data");
         }
-        public async Task<Container[]> GetContainersAsync(params string[] tagGroupNames)
+        
+        public async Task<Container[]> GetContainersByGroupNameAsync(params string[] tagNames)
         {
-            string tag = JsonConvert.SerializeObject(tagGroupNames);
+            string tag = JsonConvert.SerializeObject(tagNames);
             string body = $"{{\n\t\"tagNames\":{tag}\n}}";
-            return await JsonRequestAsync<Container[]>($"{_localAddress}/api/v1/env/list", body, "..data.list" );
+            return await JsonRequestAsync<Container[]>($"{_localAddress}/api/v1/env/list", body, "..data.list");
         }
-        public async Task<Container[]> GetContainerAsync(params string[] containerCodes)
+        
+        public async Task<Container[]> GetContainersByCodeAsync(params string[] containerCodes)
         {
             string tag = JsonConvert.SerializeObject(containerCodes);
             string body = $"{{\n\t\"containerCodes\":{tag}\n}}";
-            return await JsonRequestAsync<Container[]>($"{_localAddress}/api/v1/env/list", body, "..data.list");
+            return await JsonRequestAsync<Container[]>($"{_localAddress}/api/v1/env/list", body, "..data.list" );
         }
-        public async Task<Web> OpenWebAsync(string containerCode)
+
+        public async Task<bool> OpenWebAsync(string containerCode, Rectangle area)
         {
+
             string body = $"{{\n\t" +
                 $"\"containerCode\":\"{containerCode}\",\n\t" +
                 $"\"isWebDriverReadOnlyMode\":false,\n\t" +
                 $"\"args\":[\"--no-sandbox\"]\n" +
                 $"}}";
-            return await JsonRequestAsync<Web>($"{_localAddress}/api/v1/browser/start", body, null);
-        }
+            Hubstudio.Models.Web web = await JsonRequestAsync<Web>($"{_localAddress}/api/v1/browser/start", body, null);
+            if (web.Code == WebStatusTypes.成功)
+            {
 
-        public async Task<int> CloseWebAsync(string containerCode)
+                Hubstudio.Models.Container[] containers = await GetContainersByCodeAsync(containerCode);
+                ChromeDriver chromeDriver = GetChromeDriver(web);
+                WorkStatus wc = new WorkStatus();
+                wc.Web = web;
+                wc.Container = containers[0];
+                wc.Driver = chromeDriver;
+                wc.Area = area;
+                wc.Result = ActionTypes.NONE;
+                _workStatusInfo[containerCode] = wc;
+                await Task.Run(() =>
+                {
+                    new TikTokActuator(containerCode, chromeDriver).Resize(area);
+                    new TikTokActuator(containerCode, chromeDriver).SwitchWebsite();
+                });
+
+                return true;
+            }
+            return false;
+        }
+        
+        public async Task<bool> CloseWebAsync(string containerCode)
         {
             string body = $"containerCode={containerCode}";
-            return await JsonRequestAsync<int>($"{_localAddress}/api/v1/browser/stop", body, ".code", method:"GET");
+            if( 0 == await JsonRequestAsync<int>($"{_localAddress}/api/v1/browser/stop", body, ".code", method: "GET"))
+            {
+                WorkStatus workContainerInfo;
+                _workStatusInfo.TryRemove(containerCode, out workContainerInfo);
+                if (workContainerInfo.Container.ContainerCode.Equals(containerCode))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
-
-        private T JsonRequest<T>(string url, string body = null, string responseToken = null, string method="POST")
+        
+        private T JsonRequest<T>(string url, string body = null, string responseToken = null, string method = "POST")
         {
             T t = default(T);
             HttpWebRequest request = null;
-            
+
             HttpWebResponse response = null;
             Stream responseStream = null;
             StreamReader streamReader = null;
@@ -133,7 +226,7 @@ namespace TikTokBrowse.Hubstudio
             {
                 if (method.Equals("GET"))
                 {
-                    request = (HttpWebRequest)WebRequest.Create(url+$"?{body}");
+                    request = (HttpWebRequest)WebRequest.Create(url + $"?{body}");
                     request.ContentType = "application/json;charset=utf-8";
                     request.Method = method;
                 }
@@ -152,7 +245,7 @@ namespace TikTokBrowse.Hubstudio
                             write.Write(payload, 0, payload.Length);
                         }
                     }
-                    
+
                 }
                 response = (HttpWebResponse)request.GetResponse();
                 responseStream = response.GetResponseStream();
@@ -173,11 +266,14 @@ namespace TikTokBrowse.Hubstudio
             }
             finally
             {
-
-                response.Close();
+                if (response != null)
+                {
+                    response.Close();
+                }
             }
             return t;
         }
+        
         private Task<T> JsonRequestAsync<T>(string url, string body = null, string responseToken = null, string method = "POST")
         {
             return Task.Run<T>(() =>
@@ -185,7 +281,107 @@ namespace TikTokBrowse.Hubstudio
                 return JsonRequest<T>(url, body, responseToken, method);
             });
         }
+        #endregion
+        private ChromeDriver GetChromeDriver(Hubstudio.Models.Web web)
+        {
+            ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.BinaryLocation = web.Data.BrowserPath;
+            chromeOptions.DebuggerAddress = $"127.0.0.1:{web.Data.DebuggingPort}";
+            // 关闭黑窗
+            ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService(Path.GetDirectoryName(web.Data.Webdriver));
+            chromeDriverService.HideCommandPromptWindow = true;
+            return new ChromeDriver(chromeDriverService, chromeOptions);
+
+        }
 
 
+        public void SetAreaHolder(int screenNumber, int index, string containerCode)
+        {
+            if (screenNumber <= _screenCount)
+            {
+                _workArea[screenNumber][index] = containerCode;
+            }
+        }
+        public int GetAvailableAreaIndex(int screenNumber)
+        {
+            if( screenNumber <= _screenCount)
+            {
+                Rectangle screenArea = Screen.AllScreens[screenNumber].WorkingArea;
+                int i;
+                for ( i = _workArea[screenNumber].Length -1; i >=0 ; i--)
+                {
+                    if (string.IsNullOrWhiteSpace(_workArea[screenNumber][i]))
+                    {
+                        break;
+                    }
+                }
+                return i;
+            }
+            return -1;
+        }
+        public Rectangle GetOrdinaryArea(int screenNumber, int index)
+        {
+            return GetArea(screenNumber, index, new Size(600, 900));
+        }
+        public Rectangle GetArea(int screenNumber, int index, Size size) 
+        {
+            if (screenNumber <= _screenCount)
+            {
+                Rectangle screenArea = Screen.AllScreens[screenNumber].WorkingArea;
+                int x = screenArea.X + (screenArea.Width - size.Width) / 4 * (index % 5);
+                int y = screenArea.Height / 2 * (index < 5 ? 1 : 0);
+                return new Rectangle(x, y, size.Width, size.Height);
+
+            }
+            return new Rectangle(0, 0, size.Width, size.Height);
+        }
+
+
+
+        public void SingleWorks(string code, ActuatorEventDelegate actuator)
+        {
+            ThreadPool.QueueUserWorkItem((status)=> 
+            {
+                try
+                {
+                    actuator?.Invoke(new TikTokActuator(code, _workStatusInfo[code].Driver));
+                }
+                catch (NoSuchElementException ex)
+                {
+
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+            });
+        }
+
+        public void CycleWork(string code, CycleActuatorEventDelegate actuator)
+        {
+            ThreadPool.QueueUserWorkItem((status) =>
+            {
+                bool result = false;
+                int count= 0;
+                do
+                {
+                    try
+                    {
+                        count++;
+                        actuator?.Invoke(new TikTokActuator(code, _workStatusInfo[code].Driver), ref result, ref count);
+                    }
+                    catch (NoSuchElementException ex)
+                    {
+
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+
+                } while (result);
+            });
+        }
     }
 }
