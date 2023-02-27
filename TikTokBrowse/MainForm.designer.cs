@@ -30,14 +30,7 @@ namespace TikTokBrowse
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnChangeGroup = new System.Windows.Forms.Button();
-            this.cbGroup = new System.Windows.Forms.ComboBox();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.lbWait = new System.Windows.Forms.ToolStripStatusLabel();
-            this.lbLog = new System.Windows.Forms.ToolStripStatusLabel();
-            this.gird = new System.Windows.Forms.DataGridView();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.gridMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.打开环境ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.关闭环境ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -57,132 +50,45 @@ namespace TikTokBrowse
             this.评论ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.关注ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.分析视频权重ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.label2 = new System.Windows.Forms.Label();
-            this.btnConfigFilePath = new System.Windows.Forms.Button();
-            this.txtConfigFileName = new System.Windows.Forms.TextBox();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.txtLog = new System.Windows.Forms.TextBox();
-            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnCleanLog = new System.Windows.Forms.Button();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.窗口 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.进度 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.环境状态 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.博主 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.粉丝数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LIKE数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.评论数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.标签 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.行为 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.发表评论 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.跳转ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.flowLayoutPanel1.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gird)).BeginInit();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.txtConfigFileName = new System.Windows.Forms.TextBox();
+            this.btnConfigFilePath = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.lbWait = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lbLog = new System.Windows.Forms.ToolStripStatusLabel();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.cbGroup = new System.Windows.Forms.ComboBox();
+            this.btnChangeGroup = new System.Windows.Forms.Button();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.gird = new System.Windows.Forms.DataGridView();
+            this.发表评论 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.行为 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.标签 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.评论数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LIKE数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.粉丝数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.博主 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.环境状态 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.进度 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.窗口 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.序号 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
             this.gridMenuStrip.SuspendLayout();
-            this.tabControl1.SuspendLayout();
-            this.tabPage1.SuspendLayout();
-            this.panel2.SuspendLayout();
-            this.tabPage2.SuspendLayout();
-            this.tabPage3.SuspendLayout();
-            this.flowLayoutPanel2.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
+            this.flowLayoutPanel1.SuspendLayout();
+            this.panel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gird)).BeginInit();
+            this.tabControl1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // flowLayoutPanel1
-            // 
-            this.flowLayoutPanel1.AutoSize = true;
-            this.flowLayoutPanel1.Controls.Add(this.btnChangeGroup);
-            this.flowLayoutPanel1.Controls.Add(this.cbGroup);
-            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(1104, 29);
-            this.flowLayoutPanel1.TabIndex = 8;
-            // 
-            // btnChangeGroup
-            // 
-            this.btnChangeGroup.Location = new System.Drawing.Point(3, 3);
-            this.btnChangeGroup.Name = "btnChangeGroup";
-            this.btnChangeGroup.Size = new System.Drawing.Size(75, 23);
-            this.btnChangeGroup.TabIndex = 0;
-            this.btnChangeGroup.Text = "获取环境";
-            this.btnChangeGroup.UseVisualStyleBackColor = true;
-            this.btnChangeGroup.Click += new System.EventHandler(this.btnChangeGroup_Click);
-            // 
-            // cbGroup
-            // 
-            this.cbGroup.FormattingEnabled = true;
-            this.cbGroup.Location = new System.Drawing.Point(81, 4);
-            this.cbGroup.Margin = new System.Windows.Forms.Padding(0, 4, 3, 3);
-            this.cbGroup.Name = "cbGroup";
-            this.cbGroup.Size = new System.Drawing.Size(159, 20);
-            this.cbGroup.TabIndex = 1;
-            // 
-            // statusStrip1
-            // 
-            this.statusStrip1.BackColor = System.Drawing.SystemColors.Window;
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lbWait,
-            this.lbLog});
-            this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            this.statusStrip1.Location = new System.Drawing.Point(3, 371);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1104, 22);
-            this.statusStrip1.TabIndex = 9;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // lbWait
-            // 
-            this.lbWait.Image = global::TikTokBrowse.Properties.Resources.load_30_128;
-            this.lbWait.Name = "lbWait";
-            this.lbWait.Size = new System.Drawing.Size(16, 16);
-            this.lbWait.Visible = false;
-            // 
-            // lbLog
-            // 
-            this.lbLog.Name = "lbLog";
-            this.lbLog.Size = new System.Drawing.Size(68, 17);
-            this.lbLog.Text = "正常使用中";
-            // 
-            // gird
-            // 
-            this.gird.AllowUserToAddRows = false;
-            this.gird.AllowUserToDeleteRows = false;
-            this.gird.AllowUserToResizeRows = false;
-            this.gird.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.gird.BackgroundColor = System.Drawing.SystemColors.Window;
-            this.gird.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.gird.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.gird.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Column2,
-            this.Column3,
-            this.窗口,
-            this.进度,
-            this.环境状态,
-            this.博主,
-            this.粉丝数,
-            this.LIKE数,
-            this.评论数,
-            this.标签,
-            this.行为,
-            this.发表评论});
-            this.gird.ContextMenuStrip = this.gridMenuStrip;
-            this.gird.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gird.Location = new System.Drawing.Point(4, 0);
-            this.gird.Name = "gird";
-            this.gird.RowTemplate.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.LightSeaGreen;
-            this.gird.RowTemplate.Height = 20;
-            this.gird.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gird.Size = new System.Drawing.Size(1100, 339);
-            this.gird.TabIndex = 10;
-            this.gird.RowStateChanged += new System.Windows.Forms.DataGridViewRowStateChangedEventHandler(this.dataGridView1_RowStateChanged);
             // 
             // gridMenuStrip
             // 
@@ -205,7 +111,7 @@ namespace TikTokBrowse
             this.分析视频权重ToolStripMenuItem,
             this.跳转ToolStripMenuItem});
             this.gridMenuStrip.Name = "gridMenuStrip";
-            this.gridMenuStrip.Size = new System.Drawing.Size(181, 336);
+            this.gridMenuStrip.Size = new System.Drawing.Size(149, 314);
             // 
             // 打开环境ToolStripMenuItem
             // 
@@ -327,41 +233,22 @@ namespace TikTokBrowse
             this.分析视频权重ToolStripMenuItem.Text = "分析视频权重";
             this.分析视频权重ToolStripMenuItem.Click += new System.EventHandler(this.分析视频权重ToolStripMenuItem_Click);
             // 
-            // tabControl1
+            // 跳转ToolStripMenuItem
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabPage3);
-            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(2, 2);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1118, 422);
-            this.tabControl1.TabIndex = 15;
-            this.tabControl1.Tag = "";
+            this.跳转ToolStripMenuItem.Name = "跳转ToolStripMenuItem";
+            this.跳转ToolStripMenuItem.Size = new System.Drawing.Size(148, 22);
+            this.跳转ToolStripMenuItem.Text = "跳转";
+            this.跳转ToolStripMenuItem.Click += new System.EventHandler(this.跳转ToolStripMenuItem_Click);
             // 
-            // tabPage1
+            // panel1
             // 
-            this.tabPage1.Controls.Add(this.panel2);
-            this.tabPage1.Controls.Add(this.flowLayoutPanel1);
-            this.tabPage1.Controls.Add(this.statusStrip1);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1110, 396);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "主页";
-            this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // panel2
-            // 
-            this.panel2.Controls.Add(this.gird);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(3, 32);
-            this.panel2.Name = "panel2";
-            this.panel2.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
-            this.panel2.Size = new System.Drawing.Size(1104, 339);
-            this.panel2.TabIndex = 11;
+            this.panel1.Controls.Add(this.tabControl1);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Padding = new System.Windows.Forms.Padding(2);
+            this.panel1.Size = new System.Drawing.Size(1122, 426);
+            this.panel1.TabIndex = 16;
             // 
             // tabPage2
             // 
@@ -376,24 +263,6 @@ namespace TikTokBrowse
             this.tabPage2.Text = "设置";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 15);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(77, 12);
-            this.label2.TabIndex = 8;
-            this.label2.Text = "配置文件路径";
-            // 
-            // btnConfigFilePath
-            // 
-            this.btnConfigFilePath.Location = new System.Drawing.Point(491, 10);
-            this.btnConfigFilePath.Name = "btnConfigFilePath";
-            this.btnConfigFilePath.Size = new System.Drawing.Size(35, 23);
-            this.btnConfigFilePath.TabIndex = 6;
-            this.btnConfigFilePath.Text = "...";
-            this.btnConfigFilePath.UseVisualStyleBackColor = true;
-            // 
             // txtConfigFileName
             // 
             this.txtConfigFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -404,76 +273,230 @@ namespace TikTokBrowse
             this.txtConfigFileName.ReadOnly = true;
             this.txtConfigFileName.Size = new System.Drawing.Size(397, 21);
             this.txtConfigFileName.TabIndex = 5;
-            this.txtConfigFileName.Text = "C:\\Users\\Administration\\Desktop\\config.json";
+            this.txtConfigFileName.Text = "D:\\Desktop\\config.json";
             // 
-            // tabPage3
+            // btnConfigFilePath
             // 
-            this.tabPage3.Controls.Add(this.txtLog);
-            this.tabPage3.Controls.Add(this.flowLayoutPanel2);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(1110, 396);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "运行日志";
-            this.tabPage3.UseVisualStyleBackColor = true;
+            this.btnConfigFilePath.Location = new System.Drawing.Point(491, 10);
+            this.btnConfigFilePath.Name = "btnConfigFilePath";
+            this.btnConfigFilePath.Size = new System.Drawing.Size(35, 23);
+            this.btnConfigFilePath.TabIndex = 6;
+            this.btnConfigFilePath.Text = "...";
+            this.btnConfigFilePath.UseVisualStyleBackColor = true;
             // 
-            // txtLog
+            // label2
             // 
-            this.txtLog.BackColor = System.Drawing.SystemColors.Window;
-            this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtLog.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtLog.Location = new System.Drawing.Point(3, 32);
-            this.txtLog.MaxLength = 5;
-            this.txtLog.Multiline = true;
-            this.txtLog.Name = "txtLog";
-            this.txtLog.ReadOnly = true;
-            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtLog.Size = new System.Drawing.Size(1104, 361);
-            this.txtLog.TabIndex = 0;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 15);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(77, 12);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "配置文件路径";
             // 
-            // flowLayoutPanel2
+            // tabPage1
             // 
-            this.flowLayoutPanel2.AutoSize = true;
-            this.flowLayoutPanel2.Controls.Add(this.btnCleanLog);
-            this.flowLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(3, 3);
-            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(1104, 29);
-            this.flowLayoutPanel2.TabIndex = 2;
+            this.tabPage1.Controls.Add(this.panel2);
+            this.tabPage1.Controls.Add(this.flowLayoutPanel1);
+            this.tabPage1.Controls.Add(this.statusStrip1);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(1110, 396);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "主页";
+            this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // btnCleanLog
+            // statusStrip1
             // 
-            this.btnCleanLog.Location = new System.Drawing.Point(3, 3);
-            this.btnCleanLog.Name = "btnCleanLog";
-            this.btnCleanLog.Size = new System.Drawing.Size(128, 23);
-            this.btnCleanLog.TabIndex = 1;
-            this.btnCleanLog.Text = "保留最后100行";
-            this.btnCleanLog.UseVisualStyleBackColor = true;
-            this.btnCleanLog.Click += new System.EventHandler(this.btnCleanLog_Click);
+            this.statusStrip1.BackColor = System.Drawing.SystemColors.Window;
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lbWait,
+            this.lbLog});
+            this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
+            this.statusStrip1.Location = new System.Drawing.Point(3, 371);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1104, 22);
+            this.statusStrip1.TabIndex = 9;
+            this.statusStrip1.Text = "statusStrip1";
             // 
-            // panel1
+            // lbWait
             // 
-            this.panel1.Controls.Add(this.tabControl1);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Padding = new System.Windows.Forms.Padding(2);
-            this.panel1.Size = new System.Drawing.Size(1122, 426);
-            this.panel1.TabIndex = 16;
+            this.lbWait.Image = global::TikTokBrowse.Properties.Resources.load_30_128;
+            this.lbWait.Name = "lbWait";
+            this.lbWait.Size = new System.Drawing.Size(16, 16);
+            this.lbWait.Visible = false;
             // 
-            // Column2
+            // lbLog
             // 
-            this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.Column2.DataPropertyName = "ContainerCode";
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
-            this.Column2.DefaultCellStyle = dataGridViewCellStyle2;
-            this.Column2.FillWeight = 104.8951F;
-            this.Column2.Frozen = true;
-            this.Column2.HeaderText = "环境ID";
-            this.Column2.Name = "Column2";
-            this.Column2.ReadOnly = true;
-            this.Column2.Width = 80;
+            this.lbLog.Name = "lbLog";
+            this.lbLog.Size = new System.Drawing.Size(68, 17);
+            this.lbLog.Text = "正常使用中";
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.AutoSize = true;
+            this.flowLayoutPanel1.Controls.Add(this.btnChangeGroup);
+            this.flowLayoutPanel1.Controls.Add(this.cbGroup);
+            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(1104, 29);
+            this.flowLayoutPanel1.TabIndex = 8;
+            // 
+            // cbGroup
+            // 
+            this.cbGroup.FormattingEnabled = true;
+            this.cbGroup.Location = new System.Drawing.Point(81, 4);
+            this.cbGroup.Margin = new System.Windows.Forms.Padding(0, 4, 3, 3);
+            this.cbGroup.Name = "cbGroup";
+            this.cbGroup.Size = new System.Drawing.Size(159, 20);
+            this.cbGroup.TabIndex = 1;
+            // 
+            // btnChangeGroup
+            // 
+            this.btnChangeGroup.Location = new System.Drawing.Point(3, 3);
+            this.btnChangeGroup.Name = "btnChangeGroup";
+            this.btnChangeGroup.Size = new System.Drawing.Size(75, 23);
+            this.btnChangeGroup.TabIndex = 0;
+            this.btnChangeGroup.Text = "获取环境";
+            this.btnChangeGroup.UseVisualStyleBackColor = true;
+            this.btnChangeGroup.Click += new System.EventHandler(this.btnChangeGroup_Click);
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.gird);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(3, 32);
+            this.panel2.Name = "panel2";
+            this.panel2.Padding = new System.Windows.Forms.Padding(4, 0, 0, 0);
+            this.panel2.Size = new System.Drawing.Size(1104, 339);
+            this.panel2.TabIndex = 11;
+            // 
+            // gird
+            // 
+            this.gird.AllowUserToAddRows = false;
+            this.gird.AllowUserToDeleteRows = false;
+            this.gird.AllowUserToResizeRows = false;
+            this.gird.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.gird.BackgroundColor = System.Drawing.SystemColors.Window;
+            this.gird.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.gird.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.gird.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.序号,
+            this.Column2,
+            this.Column3,
+            this.窗口,
+            this.进度,
+            this.环境状态,
+            this.博主,
+            this.粉丝数,
+            this.LIKE数,
+            this.评论数,
+            this.标签,
+            this.行为,
+            this.发表评论});
+            this.gird.ContextMenuStrip = this.gridMenuStrip;
+            this.gird.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gird.Location = new System.Drawing.Point(4, 0);
+            this.gird.Name = "gird";
+            this.gird.RowTemplate.DefaultCellStyle.SelectionBackColor = System.Drawing.Color.LightSeaGreen;
+            this.gird.RowTemplate.Height = 20;
+            this.gird.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.gird.Size = new System.Drawing.Size(1100, 339);
+            this.gird.TabIndex = 10;
+            this.gird.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.gird_RowPostPaint);
+            // 
+            // 发表评论
+            // 
+            this.发表评论.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.发表评论.HeaderText = "发表评论";
+            this.发表评论.MinimumWidth = 100;
+            this.发表评论.Name = "发表评论";
+            this.发表评论.ReadOnly = true;
+            // 
+            // 行为
+            // 
+            this.行为.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.行为.DataPropertyName = "Behavior";
+            this.行为.HeaderText = "行为";
+            this.行为.Name = "行为";
+            this.行为.ReadOnly = true;
+            this.行为.Width = 150;
+            // 
+            // 标签
+            // 
+            this.标签.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.标签.DataPropertyName = "Tag";
+            this.标签.HeaderText = "标签";
+            this.标签.Name = "标签";
+            this.标签.ReadOnly = true;
+            this.标签.Width = 150;
+            // 
+            // 评论数
+            // 
+            this.评论数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.评论数.DataPropertyName = "CommentNumber";
+            this.评论数.HeaderText = "评论数";
+            this.评论数.Name = "评论数";
+            this.评论数.ReadOnly = true;
+            this.评论数.Width = 70;
+            // 
+            // LIKE数
+            // 
+            this.LIKE数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.LIKE数.DataPropertyName = "LikeNumber";
+            this.LIKE数.HeaderText = "LIKE数";
+            this.LIKE数.Name = "LIKE数";
+            this.LIKE数.ReadOnly = true;
+            this.LIKE数.Width = 70;
+            // 
+            // 粉丝数
+            // 
+            this.粉丝数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.粉丝数.DataPropertyName = "FollowerNumber";
+            this.粉丝数.HeaderText = "粉丝数";
+            this.粉丝数.Name = "粉丝数";
+            this.粉丝数.ReadOnly = true;
+            this.粉丝数.Width = 70;
+            // 
+            // 博主
+            // 
+            this.博主.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.博主.DataPropertyName = "BloggerName";
+            this.博主.HeaderText = "博主";
+            this.博主.Name = "博主";
+            this.博主.ReadOnly = true;
+            this.博主.Width = 70;
+            // 
+            // 环境状态
+            // 
+            this.环境状态.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.环境状态.DataPropertyName = "ContainerStatus";
+            this.环境状态.Frozen = true;
+            this.环境状态.HeaderText = "环境状态";
+            this.环境状态.Name = "环境状态";
+            this.环境状态.ReadOnly = true;
+            this.环境状态.Width = 150;
+            // 
+            // 进度
+            // 
+            this.进度.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.进度.DataPropertyName = "VideoProgress";
+            this.进度.Frozen = true;
+            this.进度.HeaderText = "进度";
+            this.进度.Name = "进度";
+            this.进度.ReadOnly = true;
+            this.进度.Width = 70;
+            // 
+            // 窗口
+            // 
+            this.窗口.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.窗口.DataPropertyName = "ContainerPosition";
+            this.窗口.Frozen = true;
+            this.窗口.HeaderText = "窗口";
+            this.窗口.Name = "窗口";
+            this.窗口.ReadOnly = true;
+            this.窗口.Width = 70;
             // 
             // Column3
             // 
@@ -486,104 +509,38 @@ namespace TikTokBrowse
             this.Column3.ReadOnly = true;
             this.Column3.Width = 200;
             // 
-            // 窗口
+            // Column2
             // 
-            this.窗口.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.窗口.DataPropertyName = "ContainerPosition";
-            this.窗口.Frozen = true;
-            this.窗口.HeaderText = "窗口";
-            this.窗口.Name = "窗口";
-            this.窗口.ReadOnly = true;
-            this.窗口.Width = 70;
+            this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.Column2.DataPropertyName = "ContainerCode";
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.White;
+            this.Column2.DefaultCellStyle = dataGridViewCellStyle1;
+            this.Column2.FillWeight = 104.8951F;
+            this.Column2.Frozen = true;
+            this.Column2.HeaderText = "环境ID";
+            this.Column2.Name = "Column2";
+            this.Column2.ReadOnly = true;
+            this.Column2.Width = 80;
             // 
-            // 进度
+            // 序号
             // 
-            this.进度.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.进度.DataPropertyName = "VideoProgress";
-            this.进度.Frozen = true;
-            this.进度.HeaderText = "进度";
-            this.进度.Name = "进度";
-            this.进度.ReadOnly = true;
-            this.进度.Width = 70;
+            this.序号.Frozen = true;
+            this.序号.HeaderText = "序号";
+            this.序号.Name = "序号";
+            this.序号.ReadOnly = true;
+            this.序号.Width = 54;
             // 
-            // 环境状态
+            // tabControl1
             // 
-            this.环境状态.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.环境状态.DataPropertyName = "ContainerStatus";
-            this.环境状态.Frozen = true;
-            this.环境状态.HeaderText = "环境状态";
-            this.环境状态.Name = "环境状态";
-            this.环境状态.ReadOnly = true;
-            this.环境状态.Width = 150;
-            // 
-            // 博主
-            // 
-            this.博主.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.博主.DataPropertyName = "BloggerName";
-            this.博主.HeaderText = "博主";
-            this.博主.Name = "博主";
-            this.博主.ReadOnly = true;
-            this.博主.Width = 70;
-            // 
-            // 粉丝数
-            // 
-            this.粉丝数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.粉丝数.DataPropertyName = "FollowerNumber";
-            this.粉丝数.HeaderText = "粉丝数";
-            this.粉丝数.Name = "粉丝数";
-            this.粉丝数.ReadOnly = true;
-            this.粉丝数.Width = 70;
-            // 
-            // LIKE数
-            // 
-            this.LIKE数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LIKE数.DataPropertyName = "LikeNumber";
-            this.LIKE数.HeaderText = "LIKE数";
-            this.LIKE数.Name = "LIKE数";
-            this.LIKE数.ReadOnly = true;
-            this.LIKE数.Width = 70;
-            // 
-            // 评论数
-            // 
-            this.评论数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.评论数.DataPropertyName = "CommentNumber";
-            this.评论数.HeaderText = "评论数";
-            this.评论数.Name = "评论数";
-            this.评论数.ReadOnly = true;
-            this.评论数.Width = 70;
-            // 
-            // 标签
-            // 
-            this.标签.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.标签.DataPropertyName = "Tag";
-            this.标签.HeaderText = "标签";
-            this.标签.Name = "标签";
-            this.标签.ReadOnly = true;
-            this.标签.Width = 150;
-            // 
-            // 行为
-            // 
-            this.行为.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.行为.DataPropertyName = "Behavior";
-            this.行为.HeaderText = "行为";
-            this.行为.Name = "行为";
-            this.行为.ReadOnly = true;
-            this.行为.Width = 150;
-            // 
-            // 发表评论
-            // 
-            this.发表评论.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.发表评论.HeaderText = "发表评论";
-            this.发表评论.MinimumWidth = 100;
-            this.发表评论.Name = "发表评论";
-            this.发表评论.ReadOnly = true;
-            // 
-            // 跳转ToolStripMenuItem
-            // 
-            this.跳转ToolStripMenuItem.Name = "跳转ToolStripMenuItem";
-            this.跳转ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.跳转ToolStripMenuItem.Text = "跳转";
-            this.跳转ToolStripMenuItem.Click += new System.EventHandler(this.跳转ToolStripMenuItem_Click);
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(2, 2);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(1118, 422);
+            this.tabControl1.TabIndex = 15;
+            this.tabControl1.Tag = "";
             // 
             // MainForm
             // 
@@ -597,42 +554,28 @@ namespace TikTokBrowse
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Load += new System.EventHandler(this.Form1_LoadAsync);
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gird)).EndInit();
             this.gridMenuStrip.ResumeLayout(false);
-            this.tabControl1.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
-            this.panel2.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
-            this.tabPage3.ResumeLayout(false);
-            this.tabPage3.PerformLayout();
-            this.flowLayoutPanel2.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.gird)).EndInit();
+            this.tabControl1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.DataGridView gird;
-        private System.Windows.Forms.Button btnChangeGroup;
-        private System.Windows.Forms.ComboBox cbGroup;
-        private System.Windows.Forms.ToolStripStatusLabel lbLog;
-        private System.Windows.Forms.ToolStripStatusLabel lbWait;
         private System.Windows.Forms.ContextMenuStrip gridMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem 打开环境ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 关闭环境ToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.ToolStripMenuItem 下一个视频ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 获取视频数据ToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
@@ -645,16 +588,15 @@ namespace TikTokBrowse
         private System.Windows.Forms.ToolStripMenuItem 大屏模式;
         private System.Windows.Forms.ToolStripMenuItem 开启ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 关闭ToolStripMenuItem;
-        private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.TextBox txtLog;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
-        private System.Windows.Forms.Button btnCleanLog;
         private System.Windows.Forms.ToolStripMenuItem 上一个视频toolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem 分析视频权重ToolStripMenuItem;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button btnConfigFilePath;
-        private System.Windows.Forms.TextBox txtConfigFileName;
+        private System.Windows.Forms.ToolStripMenuItem 跳转ToolStripMenuItem;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.DataGridView gird;
+        private System.Windows.Forms.DataGridViewTextBoxColumn 序号;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
         private System.Windows.Forms.DataGridViewTextBoxColumn 窗口;
@@ -667,7 +609,16 @@ namespace TikTokBrowse
         private System.Windows.Forms.DataGridViewTextBoxColumn 标签;
         private System.Windows.Forms.DataGridViewTextBoxColumn 行为;
         private System.Windows.Forms.DataGridViewTextBoxColumn 发表评论;
-        private System.Windows.Forms.ToolStripMenuItem 跳转ToolStripMenuItem;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.Button btnChangeGroup;
+        private System.Windows.Forms.ComboBox cbGroup;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lbWait;
+        private System.Windows.Forms.ToolStripStatusLabel lbLog;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button btnConfigFilePath;
+        private System.Windows.Forms.TextBox txtConfigFileName;
     }
 }
 

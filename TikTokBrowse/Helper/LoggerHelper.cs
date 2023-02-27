@@ -26,7 +26,7 @@ namespace TikTokBrowse.Helper
         {
             log.Info($" | {id} | {content}");//写入一条新log
         }
-        public static void Debug(string id, string content)
+        public static void Message(string id, string content)
         {
             log.Debug($" | {id} | {content}");//写入一条新log
         }

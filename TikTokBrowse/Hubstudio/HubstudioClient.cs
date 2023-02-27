@@ -156,7 +156,10 @@ namespace TikTokBrowse.Hubstudio
         public async Task<Container[]> GetContainersByGroupNameAsync(params string[] tagNames)
         {
             string tag = JsonConvert.SerializeObject(tagNames);
-            string body = $"{{\n\t\"tagNames\":{tag}\n}}";
+            string body = $"{{" +
+                $"\n\t\"tagNames\":{tag}," +
+                $"\n\t\"size\":150" +
+                $"\n}}";
             return await JsonRequestAsync<Container[]>($"{_localAddress}/api/v1/env/list", body, "..data.list");
         }
         
@@ -170,11 +173,11 @@ namespace TikTokBrowse.Hubstudio
         public async Task<bool> OpenWebAsync(string containerCode, Rectangle area)
         {
 
-            string body = $"{{\n\t" +
-                $"\"containerCode\":\"{containerCode}\",\n\t" +
-                $"\"isWebDriverReadOnlyMode\":false,\n\t" +
-                $"\"args\":[\"--no-sandbox\"]\n" +
-                $"}}";
+            string body = $"{{" +
+                $"\n\t\"containerCode\":\"{containerCode}\"," +
+                $"\n\t\"isWebDriverReadOnlyMode\":false," +
+                $"\n\t\"args\":[\"--no-sandbox\"]" +
+                $"\n}}";
             Hubstudio.Models.Web web = await JsonRequestAsync<Web>($"{_localAddress}/api/v1/browser/start", body, null);
             if (web.Code == WebStatusTypes.成功)
             {
@@ -302,7 +305,7 @@ namespace TikTokBrowse.Hubstudio
                 _workArea[screenNumber][index] = containerCode;
             }
         }
-        public int GetAvailableAreaIndex(int screenNumber)
+        public int GetAvailableIndex(int screenNumber)
         {
             if( screenNumber <= _screenCount)
             {
@@ -319,11 +322,11 @@ namespace TikTokBrowse.Hubstudio
             }
             return -1;
         }
-        public Rectangle GetOrdinaryArea(int screenNumber, int index)
+        public Rectangle GetOrdinaryRectangle(int screenNumber, int index)
         {
-            return GetArea(screenNumber, index, new Size(600, 900));
+            return GetRectangle(screenNumber, index, new Size(600, 900));
         }
-        public Rectangle GetArea(int screenNumber, int index, Size size) 
+        public Rectangle GetRectangle(int screenNumber, int index, Size size) 
         {
             if (screenNumber <= _screenCount)
             {

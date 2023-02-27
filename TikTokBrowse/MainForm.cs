@@ -26,7 +26,11 @@ using TikTokBrowse.Helper;
 
 namespace TikTokBrowse
 {
-
+    public struct Pix 
+    {
+        public int screen;
+        public int index;
+    }
 
     public partial class MainForm : Form
     {
@@ -36,6 +40,7 @@ namespace TikTokBrowse
         private ConcurrentDictionary<string, ViewData> _viewData = new ConcurrentDictionary<string, ViewData>();
         private Dictionary<string, Area> _area = new Dictionary<string, Area>();
         private string _configFileName = null;
+        private readonly int[] _screenSqe = new int[] { 3, 2, 0, 1 };
 
         public MainForm()
         {            
@@ -54,49 +59,51 @@ namespace TikTokBrowse
 
         }
 
+        public Pix GetPix()
+        {
+            int i = 0;
+            int j = 0;
+            for (; i < 4; i++)
+            {
+                j = _client.GetAvailableIndex(_screenSqe[i]);
+                if ( j >= 0)
+                {
+                    break;
+                }
+            }
+            Pix p = new Pix();
+            p.screen = _screenSqe[i];
+            p.index = j;
 
+            return p;
+        }
 
         #region private
 
         delegate void SetTextCallback(string id, string text);
-        private void Log(string id, string text)
+        private void Info(string id, string text)
         {
             LoggerHelper.Info(id, text);
-            FormLog(id, text);
         }
-        private void FormLog(string id, string text)
-        {
-            // InvokeRequired required compares the thread ID of the
-            // calling thread to the thread ID of the creating thread.
-            // If these threads are different, it returns true.
-            if (this.txtLog.InvokeRequired)
-            {
-                SetTextCallback d = new SetTextCallback(FormLog);
-                this.Invoke(d, new object[] { id,  text });
-            }
-            else
-            {
-                this.txtLog.AppendText(text + "\r\n");
-                this.txtLog.SelectionStart = this.txtLog.Text.Length;
-                this.txtLog.ScrollToCaret();
 
-            }
-        }
-        private void Message(string msg, bool isWait = false)
+        private void Wait(string msg, bool isWait = false)
         {
             this.lbWait.Visible = isWait;
             this.lbLog.Text = msg;
-            Log("主窗口", msg);
+            Info("主窗口", msg);
 
         }
 
-        private void Debug(string id, string text)
+        private void Message(string id, string text)
         {
-            LoggerHelper.Debug(id, text);
+            LoggerHelper.Message(id, text);
         }
         #endregion
 
         #region 功能
+        
+        
+
         /// <summary>
         /// 不阻塞睡眠
         /// </summary>
@@ -128,7 +135,7 @@ namespace TikTokBrowse
         /// <returns></returns>
         private async Task RefreshGridDataByGroupNameAsync(string tagName = null)
         {
-            Message("正在获取环境列表...", true);
+            Wait("正在获取环境列表...", true);
             btnChangeGroup.Enabled = false;
 
 
@@ -153,7 +160,7 @@ namespace TikTokBrowse
                 }
             }
             btnChangeGroup.Enabled = true;
-            Message("获取环境列表完成");
+            Wait("获取环境列表完成");
         }
 
         /// <summary>
@@ -164,7 +171,7 @@ namespace TikTokBrowse
         {
             if (_client.IsOpenConnector)
             {
-                Message("正在获取分组列表...", true);
+                Wait("正在获取分组列表...", true);
                 Hubstudio.Models.Group[] groups = await _client.GetGroupsAsync();
                 // "Tiktok账号" 拍到最前
                 for (int i = 0; i < groups.Length; i++)
@@ -185,7 +192,7 @@ namespace TikTokBrowse
                 this.cbGroup.Items.Clear();
                 this.cbGroup.Items.AddRange(Array.ConvertAll(groups, g => g.TagName));
                 this.cbGroup.SelectedIndex = 0;
-                Message("获取分组列表完成");
+                Wait("获取分组列表完成");
             }
 
         }
@@ -199,19 +206,19 @@ namespace TikTokBrowse
             if (!_client.IsOpenConnector)
             {
 
-                Message("正在打开连接器...", true);
+                Wait("正在打开连接器...", true);
                 if( await _client.OpenConnectorAsync())
                 {
-                    Message("打开连接器完成");
+                    Wait("打开连接器完成");
                     return true;
                 }
             }
             else
             {
-                Message("正在关闭连接器...", true);
+                Wait("正在关闭连接器...", true);
                 if (_client.KillConnector())
                 {
-                    Message("关闭连接器完成");
+                    Wait("关闭连接器完成");
                     return false;
                 }
             }
@@ -231,16 +238,18 @@ namespace TikTokBrowse
                 ViewData va = item.DataBoundItem as ViewData;
                 if (!_client.IsWork(va.ContainerCode))
                 {
-                    int index = _client.GetAvailableAreaIndex(0);
-                    Rectangle area = _client.GetOrdinaryArea(0, index);
-                    if (index >= 0)
+                    Pix pix = GetPix();
+                    //int index = _client.GetAvailableIndex(2);
+                    //int index = pix.index;
+                    Rectangle area = _client.GetOrdinaryRectangle(pix.screen, pix.index);
+                    if (pix.index >= 0)
                     {
-                        Message($"正在打开环境...{va.ContainerName}，{va.ContainerCode}...", true);
+                        Wait($"正在打开环境...{va.ContainerName}，{va.ContainerCode}...", true);
                         va.ContainerStatus = "打开中...";
                         if (await _client.OpenWebAsync(va.ContainerCode, area))
                         {
-                            _client.SetAreaHolder(0, index, va.ContainerCode);
-                            va.ContainerPosition = $"{0}|{index}";
+                            _client.SetAreaHolder(pix.screen, pix.index, va.ContainerCode);
+                            va.ContainerPosition = $"{pix.screen}|{pix.index}";
                             va.ContainerStatus = "已打开";
                             _client.CycleWork(va.ContainerCode, IsReadyWait);
                         }
@@ -248,7 +257,7 @@ namespace TikTokBrowse
                         {
                             va.ContainerStatus = "打开失败";
                         }
-                        Message($"打开环境完成");
+                        Wait($"打开环境完成");
                     } 
 
 
@@ -294,7 +303,7 @@ namespace TikTokBrowse
                 ViewData va = item.DataBoundItem as ViewData;
                 if (_client.IsWork(va.ContainerCode))
                 {
-                    Message($"正在关闭环境...{va.ContainerName}，{va.ContainerCode}...", true);
+                    Wait($"正在关闭环境...{va.ContainerName}，{va.ContainerCode}...", true);
                     va.ContainerStatus = "关闭中...";
                     if (await _client.CloseWebAsync(va.ContainerCode))
                     {
@@ -305,7 +314,7 @@ namespace TikTokBrowse
                     {
                         va.ContainerStatus = "关闭失败";
                     }
-                    Message($"关闭环境完成");
+                    Wait($"关闭环境完成");
                 }
             }
         }
@@ -315,36 +324,36 @@ namespace TikTokBrowse
             switch (act)
             {
                 //Log(id, $"
-                case ActionTypes.JUMP_WEBSITE: Log(id, $"{_viewData[id].ContainerStatus = "正在跳转"}"); break;
-                case ActionTypes.JUMP_WEBSITE_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "跳转完成"}"); break;
-                case ActionTypes.LOGIN_ACCOUNT: Log(id, $"{_viewData[id].ContainerStatus = "正在登录"}"); break;
-                case ActionTypes.LOGIN_ACCOUNT_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "登录完成"}"); break;
-                case ActionTypes.BIG_SCREEN_MODE: Log(id, $"{_viewData[id].ContainerStatus = "正在进入大屏模式"}"); break;
-                case ActionTypes.BIG_SCREEN_MODE_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "进入大屏模式完成"}"); break;
-                case ActionTypes.EXIT_BIG_SCREEN_MODE: Log(id, $"{_viewData[id].ContainerStatus = "正在退出大屏模式"}"); break;
-                case ActionTypes.EXIT_BIG_SCREEN_MODE_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "退出大屏模式完成"}"); break;
-                case ActionTypes.RESIZE_BROWSE: Log(id, $"{_viewData[id].ContainerStatus = "重置窗口位置"}"); break;
-                case ActionTypes.RESIZE_BROWSE_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "重置窗口位置完成"}"); break;
-                case ActionTypes.WAIT_READY: Log(id, $"{_viewData[id].ContainerStatus = "正在准备网页"}"); break;
-                case ActionTypes.WAIT_READY_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "准备网页完成"}"); break;
-                case ActionTypes.NEXT_VIDEO: Log(id, $"{_viewData[id].ContainerStatus = "正在跳转下一条视频"}"); break;
-                case ActionTypes.NEXT_VIDEO_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "跳转下一条视频完成"}"); break;
-                case ActionTypes.PREVIOUS_VIDEO: Log(id, $"{_viewData[id].ContainerStatus = "正在跳转上一条视频"}"); break;
-                case ActionTypes.PREVIOUS_VIDEO_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "跳转上一条视频完成"}"); break;
-                case ActionTypes.UPDATE_BLOGGER_DATA: Log(id, $"{_viewData[id].ContainerStatus = "正在更新博主数据"}"); break;
-                case ActionTypes.VIDEO_LIKE: Log(id, $"{_viewData[id].ContainerStatus = "正在点赞"}"); break;
-                case ActionTypes.VIDEO_LIKE_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "点赞完成"}"); break;
-                case ActionTypes.VIDEO_FOLLOW: Log(id, $"{_viewData[id].ContainerStatus = "正在关注"}"); break;
-                case ActionTypes.VIDEO_FOLLOW_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "关注完成"}"); break;
-                case ActionTypes.PUSH_COMMENT: Log(id, $"{_viewData[id].ContainerStatus = "正在发表评论"}"); break;
-                case ActionTypes.PUSH_COMMENT_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "发表评论完成"}"); break;
-                case ActionTypes.UPDATE_BLOGGER_DATA_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "更新博主数据完成"}"); break;
+                case ActionTypes.JUMP_WEBSITE: Info(id, $"{_viewData[id].ContainerStatus = "正在跳转"}"); break;
+                case ActionTypes.JUMP_WEBSITE_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "跳转完成"}"); break;
+                case ActionTypes.LOGIN_ACCOUNT: Info(id, $"{_viewData[id].ContainerStatus = "正在登录"}"); break;
+                case ActionTypes.LOGIN_ACCOUNT_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "登录完成"}"); break;
+                case ActionTypes.BIG_SCREEN_MODE: Info(id, $"{_viewData[id].ContainerStatus = "正在进入大屏模式"}"); break;
+                case ActionTypes.BIG_SCREEN_MODE_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "进入大屏模式完成"}"); break;
+                case ActionTypes.EXIT_BIG_SCREEN_MODE: Info(id, $"{_viewData[id].ContainerStatus = "正在退出大屏模式"}"); break;
+                case ActionTypes.EXIT_BIG_SCREEN_MODE_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "退出大屏模式完成"}"); break;
+                case ActionTypes.RESIZE_BROWSE: Info(id, $"{_viewData[id].ContainerStatus = "重置窗口位置"}"); break;
+                case ActionTypes.RESIZE_BROWSE_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "重置窗口位置完成"}"); break;
+                case ActionTypes.WAIT_READY: Info(id, $"{_viewData[id].ContainerStatus = "正在准备网页"}"); break;
+                case ActionTypes.WAIT_READY_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "准备网页完成"}"); break;
+                case ActionTypes.NEXT_VIDEO: Info(id, $"{_viewData[id].ContainerStatus = "正在跳转下一条视频"}"); break;
+                case ActionTypes.NEXT_VIDEO_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "跳转下一条视频完成"}"); break;
+                case ActionTypes.PREVIOUS_VIDEO: Info(id, $"{_viewData[id].ContainerStatus = "正在跳转上一条视频"}"); break;
+                case ActionTypes.PREVIOUS_VIDEO_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "跳转上一条视频完成"}"); break;
+                case ActionTypes.UPDATE_BLOGGER_DATA: Info(id, $"{_viewData[id].ContainerStatus = "正在更新博主数据"}"); break;
+                case ActionTypes.VIDEO_LIKE: Info(id, $"{_viewData[id].ContainerStatus = "正在点赞"}"); break;
+                case ActionTypes.VIDEO_LIKE_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "点赞完成"}"); break;
+                case ActionTypes.VIDEO_FOLLOW: Info(id, $"{_viewData[id].ContainerStatus = "正在关注"}"); break;
+                case ActionTypes.VIDEO_FOLLOW_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "关注完成"}"); break;
+                case ActionTypes.PUSH_COMMENT: Info(id, $"{_viewData[id].ContainerStatus = "正在发表评论"}"); break;
+                case ActionTypes.PUSH_COMMENT_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "发表评论完成"}"); break;
+                case ActionTypes.UPDATE_BLOGGER_DATA_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "更新博主数据完成"}"); break;
                 case ActionTypes.UPDATE_PLAY_BAR:/* Log(id, $"{_viewData[id].ContainerStatus = "正在更新视频进度"}");*/ break;
                 case ActionTypes.UPDATE_PLAY_BAR_FINISH: /* Log(id, $"{_viewData[id].ContainerStatus = "更新视频进度完成"}"); */ break;
-                case ActionTypes.EXTRACT_COMMENTS: Log(id, $"{_viewData[id].ContainerStatus = "正在提取评论"}"); break;
-                case ActionTypes.EXTRACT_COMMENTS_FINISH: Log(id, $"{_viewData[id].ContainerStatus = "提取评论完成"}"); break;
-                case ActionTypes.ELEMENT_NOT_FOUND: Log(id, $"{_viewData[id].ContainerStatus = _viewData[id].ContainerStatus + "_ELEMENT_NOT_FOUND"}"); break;
-                case ActionTypes.ERROR: Log(id, $"{_viewData[id].ContainerStatus = _viewData[id].ContainerStatus + "_ERROR"}"); break;
+                case ActionTypes.EXTRACT_COMMENTS: Info(id, $"{_viewData[id].ContainerStatus = "正在提取评论"}"); break;
+                case ActionTypes.EXTRACT_COMMENTS_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "提取评论完成"}"); break;
+                case ActionTypes.ELEMENT_NOT_FOUND: Info(id, $"{_viewData[id].ContainerStatus = _viewData[id].ContainerStatus + "_ELEMENT_NOT_FOUND"}"); break;
+                case ActionTypes.ERROR: Info(id, $"{_viewData[id].ContainerStatus = _viewData[id].ContainerStatus + "_ERROR"}"); break;
  
                 default: break;
             }
@@ -371,7 +380,7 @@ namespace TikTokBrowse
             {
                 if (string.IsNullOrWhiteSpace(txtConfigFileName.Text) || !File.Exists(txtConfigFileName.Text))
                 {
-                    Message("未设置 配置文件 路径");
+                    Wait("未设置 配置文件 路径");
                     OpenFileDialog openFileDialog = new OpenFileDialog();
                     openFileDialog.InitialDirectory = @"D:\Program Files\Hubstudio\2.19.0.1";
                     openFileDialog.Title = "请选择配置文件";
@@ -422,13 +431,7 @@ namespace TikTokBrowse
                 _viewData[id].CommentNumber = bd.CommentNumber;
             }
         }
-        private void CleanBloggerData(string id)
-        {
-            _viewData[id].BloggerName = "";
-            _viewData[id].FollowerNumber = "";
-            _viewData[id].LikeNumber = "";
-            _viewData[id].CommentNumber = "";
-        }
+
         private void UploadVideoProgress(string id, object value)
         {
             if (value != null)
@@ -440,13 +443,12 @@ namespace TikTokBrowse
 
         #region 界面
         // 表格自动补充序号
-        private void dataGridView1_RowStateChanged(object sender, DataGridViewRowStateChangedEventArgs e)
+        private void gird_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
-            for (int i = 0; i < gird.Rows.Count; i++)
-            {
-                this.gird.Rows[i].HeaderCell.Value = $"{i + 1}";
-            }
-            this.gird.Refresh();
+            //获取行对象
+            var row = gird.Rows[e.RowIndex];
+            //对行的第一列value赋值
+            row.Cells[0].Value = row.Index + 1;
         }
 
 
@@ -493,8 +495,6 @@ namespace TikTokBrowse
 
         private async void Form1_LoadAsync(object sender, EventArgs e)
         {
-
-
             if (InitApp())
             {
                 gird.AutoGenerateColumns = false;
@@ -603,12 +603,6 @@ namespace TikTokBrowse
             });
         }
 
-        private void btnCleanLog_Click(object sender, EventArgs e)
-        {
-            txtLog.Text = "";
-        }
-
-
 
         private void 分析视频权重ToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -631,7 +625,7 @@ namespace TikTokBrowse
             // 20分钟重新进入页面
             if(count >= 1200)
             {
-                Log(row.ContainerCode, "重新进入tk主页");
+                Info($"{row.ContainerCode} : {row.ContainerName}", "重新进入tk主页");
                 actuator.JumpWebsite();
                 count = 0;
             }
@@ -652,7 +646,7 @@ namespace TikTokBrowse
                 {
                     if (rate > 30)
                     {
-                        Log(actuator.Id, "进度大于30%，下一个视频");
+                        Info($"{row.ContainerCode} : {row.ContainerName}", "进度大于30%，下一个视频");
                         Trace(actuator.Id, ActionTypes.NEXT_VIDEO);
                         actuator.NextVideo();
                         isUploadBollger = true;
@@ -663,7 +657,7 @@ namespace TikTokBrowse
             if (isUploadBollger)
             {
                 video = actuator.GetVideoData();
-                Log(actuator.Id, $"更新视频数据, {video.BloggerNickName}");
+                Info($"{row.ContainerCode} : {row.ContainerName}", $"更新视频数据, {video.BloggerNickName}");
                 Trace(actuator.Id, ActionTypes.UPDATE_BLOGGER_DATA);
                 UploadBloggerData(actuator.Id, video);
             }
@@ -677,7 +671,7 @@ namespace TikTokBrowse
                 {
                     tag += data.ToString() + " ";
                 }
-                Log(actuator.Id, $"更新视频数据, {tag}");
+                Info($"{row.ContainerCode} : {row.ContainerName}", $"更新视频数据, {tag}");
                 row.Tag = tag;
 
             }
@@ -697,5 +691,7 @@ namespace TikTokBrowse
                 actuator.JumpWebsite();
             });
         }
+
+
     }
 }
