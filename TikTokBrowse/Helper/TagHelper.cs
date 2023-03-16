@@ -9,13 +9,13 @@ using TikTokBrowse.Models;
 
 namespace TikTokBrowse.Helper
 {
-    public class TagHelper
+    public class Taghelper
     {
         private ConcurrentDictionary<string, Tag[]> _data = new ConcurrentDictionary<string, Tag[]>();
 
         private readonly string _tagsFileDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Tags");
 
-        public TagHelper()
+        public Taghelper()
         {
             if(_data.Count ==0 && Directory.Exists(_tagsFileDirectory))
             {
@@ -33,28 +33,28 @@ namespace TikTokBrowse.Helper
                 throw new FileNotFoundException(_tagsFileDirectory);
             }
         }
-        public TagData[] Identify(params string[] tags)
+        
+        public Dictionary<string, Tag[]> Identify(params string[] tags)
         {
             Tag[] ts = Tag.Converts(tags);
             return Identify(ts);
         }
 
-        public TagData[] Identify(params Tag[] tags)
+        public Dictionary<string, Tag[]> Identify(params Tag[] tags)
         {
-            List<TagData> tagDatas = new List<TagData>() ;
+            Dictionary<string, Tag[]> dic = new Dictionary<string, Tag[]>();
             foreach (var key in _data.Keys)
             {
-                Tag[] value = _data[key];
-                lock (value)
+                lock (_data[key])
                 {
-                    int count = value.Intersect(tags ).Count();
-                    if (count > 0)
+                    IEnumerable<Tag> enumerable = _data[key].Intersect(tags);
+                    if (enumerable.Count() > 0)
                     {
-                        tagDatas.Add(new TagData() { Name = key, Count = count });
+                        dic[key] = enumerable.ToArray();
                     }
                 }
             }
-            return tagDatas.ToArray();
+            return dic;
         }
     }
 }

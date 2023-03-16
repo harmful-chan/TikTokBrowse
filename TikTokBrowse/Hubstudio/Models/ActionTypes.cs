@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 
 namespace TikTokBrowse.Hubstudio.Models
 {
+
     public enum ActionTypes
     {
         ELEMENT_NOT_FOUND = -2,    // 元素未找到
         ERROR = -1,    // 发生错误
         NONE = 0,    // 初始状态
+
+
         BIG_SCREEN_MODE,
         BIG_SCREEN_MODE_FINISH,
         EXIT_BIG_SCREEN_MODE,
@@ -40,5 +43,18 @@ namespace TikTokBrowse.Hubstudio.Models
         VIDEO_FOLLOW_FINISH,
         PUSH_COMMENT,
         PUSH_COMMENT_FINISH,
+
+        UPLOAD_VIDEO_TIMTOUT,
+        UPLOAD_VIDEO_NOT_EXIST,
+        UPLOAD_JUMPSITE,
+        UPLOAD_JUMPSITE_FINISH,
+        UPLOAD_SHOWDIALOG,
+        UPLOAD_SHOWDIALOG_FINISH,
+        UPLOAD_FILLVIDEO,
+        UPLOAD_FILLVIDEO_FINISH,
+        UPLOAD_FILLTITLE,
+        UPLOAD_FILLTITLE_FINISH,
+        UPLOAD_VIDEO,
+        UPLOAD_VIDEO_FINISH,
     }
 }

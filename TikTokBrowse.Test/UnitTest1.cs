@@ -30,25 +30,16 @@ namespace TikTokBrowse.Test
         [TestMethod]
         public void TestLogger()
         {
-            /*
-             * #CareerTok
-             * #ContentCreator
-             * #CoverLetter
-             * #JobSeeker
-             * #interview
-             * #CareerTikTok
-             * #MyJob
-             *
-             */
-            Thread[] threads = new Thread[10];
-            for (int i = 0; i < 10; i++)
+
+            Thread[] threads = new Thread[1];
+            for (int i = 0; i < 1; i++)
             {
                 threads[i] = new Thread(() =>
                 {
                     
                     for (int j = 0; j < 10; j++)
                     {
-                        LoggerHelper.Info($"{Thread.CurrentThread.ManagedThreadId}:{j}", "日志");
+                        //LoggerHelper.MInfo($"C:\\Users\\Administrator\\source\\repos\\harmful-chan\\TikTokBrowse\\TikTokBrowse\\bin\\Debug\\log\\{Thread.CurrentThread.ManagedThreadId}-{j}", "日志");
                         Thread.Sleep(200);
                     }
 
@@ -57,7 +48,7 @@ namespace TikTokBrowse.Test
             }
             while (true)
             {
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 1; i++)
                 {
                     if (!threads[i].IsAlive)
                     {
@@ -66,6 +57,15 @@ namespace TikTokBrowse.Test
                 }
                 Thread.Sleep(200);
             }
+        }
+
+        public string Name { get; set; } = "";
+
+        [TestMethod]
+        public void TestDefault()
+        {
+            UnitTest1 unitTest1 = null;
+            string a = unitTest1?.Name;
         }
     }
 }

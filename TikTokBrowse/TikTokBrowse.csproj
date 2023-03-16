@@ -62,7 +62,7 @@
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AngleSharp, Version=0.17.1.0, Culture=neutral, PublicKeyToken=e83494dcdc6d31ea, processorArchitecture=MSIL">
@@ -243,15 +243,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper\NetworkHelper.cs" />
+    <Compile Include="Helper\VideoHelper.cs" />
+    <Compile Include="Hubstudio\Extensions\ByExtension.cs" />
     <Compile Include="Hubstudio\Models\Area.cs" />
     <Compile Include="Hubstudio\Models\CycleWorkStart.cs" />
+    <Compile Include="Hubstudio\Models\Pix.cs" />
     <Compile Include="Hubstudio\Models\Secret.cs" />
     <Compile Include="Hubstudio\Models\VideoData.cs" />
     <Compile Include="Hubstudio\Models\CommentData.cs" />
     <Compile Include="Hubstudio\Models\ActionTypes.cs" />
     <Compile Include="Hubstudio\Models\SingleWorkStart.cs" />
     <Compile Include="Hubstudio\Models\WorkStatus.cs" />
-    <Compile Include="Hubstudio\Tcping.cs" />
     <Compile Include="Hubstudio\TikTokActuator.cs" />
     <Compile Include="Helper\TextHelper.cs" />
     <Compile Include="MainForm.cs">
@@ -267,15 +270,18 @@
     <Compile Include="Hubstudio\Models\Web.cs" />
     <Compile Include="Hubstudio\Models\WebDescribe.cs" />
     <Compile Include="Models\AppData.cs" />
-    <Compile Include="Models\LogInfo.cs" />
-    <Compile Include="Models\SyncEvents.cs" />
     <Compile Include="Models\Tag.cs" />
-    <Compile Include="Models\TagData.cs" />
-    <Compile Include="Models\ViewData.cs" />
+    <Compile Include="Models\RowData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helper\LoggerHelper.cs" />
     <Compile Include="Helper\TagHelper.cs" />
+    <Content Include="Resources\Titles\成人用品.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Titles\牛仔裤.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -289,6 +295,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="config.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -350,7 +359,6 @@
     <Content Include="Resources\Tags\艺术.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="TikTokBrowse_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

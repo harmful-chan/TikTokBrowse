@@ -26,10 +26,14 @@ namespace TikTokBrowse.Models
             set { _name = value; }
         }
 
-
         public Tag()
         {
 
+        }
+        public Tag(char symbol, string name)
+        {
+            _symbol = symbol;
+            _name = name;
         }
 
         public override string ToString()

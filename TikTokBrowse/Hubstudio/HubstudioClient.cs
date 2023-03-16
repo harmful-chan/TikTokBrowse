@@ -15,6 +15,7 @@ using Newtonsoft.Json.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
+using TikTokBrowse.Helper;
 using TikTokBrowse.Hubstudio.Models;
 
 namespace TikTokBrowse.Hubstudio
@@ -32,7 +33,7 @@ namespace TikTokBrowse.Hubstudio
         private ConcurrentDictionary<string, WorkStatus> _workStatusInfo = new ConcurrentDictionary<string, WorkStatus>();
         private ConcurrentDictionary<int, string[]> _workArea = new ConcurrentDictionary<int, string[]>();
         public delegate void ActuatorEventDelegate(TikTokActuator actuator);
-        public delegate void CycleActuatorEventDelegate(TikTokActuator actuator, ref bool isContinue, ref int count);
+        public delegate void CycleActuatorEventDelegate(TikTokActuator actuator, ref bool isContinue, ref int okCount, ref int noSuchElementCount);
         public bool IsOpenConnector { get; private set; }
         public bool IsWork(string containerCode)
         {
@@ -57,12 +58,21 @@ namespace TikTokBrowse.Hubstudio
             for (int i = 0; i < _screenCount; i++)
             {
                 _workArea[i] = new string[_screenContainerCount];
+                for (int j = 0; j < _screenContainerCount; j++)
+                {
+                    _workArea[i][j] = "";
+                }
             }
             
             
-            ThreadPool.SetMaxThreads(10, 10);
+            ThreadPool.SetMaxThreads(50, 50);
         }
 
+
+        public string GetContainerDirectory(string containerCode)
+        {
+            return _workStatusInfo[containerCode].Web.Data.DownloadPath;
+        }
 
         #region 连接器
         public async Task<bool> OpenConnectorAsync()
@@ -99,8 +109,7 @@ namespace TikTokBrowse.Hubstudio
                     {
                         while (true)
                         {
-                            double time = await Tcping.Ping5Async("127.0.0.1", _httpPort, 2);
-                            if (time < 1000.00)
+                            if (await NetworkHelper.TcpTestAsync("127.0.0.1", _httpPort, 2) == NetworkResultTypes.Success)
                             {
                                 IsOpenConnector = true;
                                 return true;
@@ -166,7 +175,10 @@ namespace TikTokBrowse.Hubstudio
         public async Task<Container[]> GetContainersByCodeAsync(params string[] containerCodes)
         {
             string tag = JsonConvert.SerializeObject(containerCodes);
-            string body = $"{{\n\t\"containerCodes\":{tag}\n}}";
+            string body = $"{{" +
+                $"\n\t\"containerCodes\":{tag}," +
+                $"\n\t\"size\":150" +
+                $"\n}}";
             return await JsonRequestAsync<Container[]>($"{_localAddress}/api/v1/env/list", body, "..data.list" );
         }
 
@@ -290,20 +302,54 @@ namespace TikTokBrowse.Hubstudio
             ChromeOptions chromeOptions = new ChromeOptions();
             chromeOptions.BinaryLocation = web.Data.BrowserPath;
             chromeOptions.DebuggerAddress = $"127.0.0.1:{web.Data.DebuggingPort}";
+        
             // 关闭黑窗
             ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService(Path.GetDirectoryName(web.Data.Webdriver));
             chromeDriverService.HideCommandPromptWindow = true;
-            return new ChromeDriver(chromeDriverService, chromeOptions);
+            ChromeDriver chromeDriver = new ChromeDriver(chromeDriverService, chromeOptions);
+
+            return chromeDriver;
 
         }
 
 
-        public void SetAreaHolder(int screenNumber, int index, string containerCode)
+        public void SetAreaHolder(Pix pix, string containerCode)
         {
-            if (screenNumber <= _screenCount)
+            if (pix.Screen <= _screenCount)
             {
-                _workArea[screenNumber][index] = containerCode;
+                _workArea[pix.Screen][pix.Index] = containerCode;
             }
+        }
+        public Pix GetAreaHolder(string containerCode)
+        {
+            int i, j=0;
+            for (i = 0; i < _screenCount; i++)
+            {
+                for (j = 0; j < _screenContainerCount; j++)
+                {
+                    if( _workArea[i][j].Equals(containerCode))
+                    {
+                        break;
+                    }
+                }
+                if(j != _screenContainerCount)
+                {
+                    break;
+                }
+            }
+            if( i < _screenCount && j < _screenContainerCount)
+            {
+                return new Pix()
+                {
+                    Screen = i,
+                    Index = j
+                };
+            }
+            else
+            {
+                return null;
+            }
+
         }
         public int GetAvailableIndex(int screenNumber)
         {
@@ -322,6 +368,15 @@ namespace TikTokBrowse.Hubstudio
             }
             return -1;
         }
+
+        public void SetAvailableIndex(Pix pix)
+        {
+            if (pix.Screen <= _screenCount)
+            {
+                _workArea[pix.Screen][pix.Index] = "";
+            }
+        }
+
         public Rectangle GetOrdinaryRectangle(int screenNumber, int index)
         {
             return GetRectangle(screenNumber, index, new Size(600, 900));
@@ -365,25 +420,38 @@ namespace TikTokBrowse.Hubstudio
         {
             ThreadPool.QueueUserWorkItem((status) =>
             {
-                bool result = false;
-                int count= 0;
+                bool isContinue = false;
+                int okCount= 0;
+                int noSuchElementCount = 0;
                 do
                 {
                     try
                     {
-                        count++;
-                        actuator?.Invoke(new TikTokActuator(code, _workStatusInfo[code].Driver), ref result, ref count);
+                        okCount++;
+                        actuator?.Invoke(new TikTokActuator(code, _workStatusInfo[code].Driver), 
+                            ref isContinue, 
+                            ref okCount,
+                            ref noSuchElementCount);
+                        noSuchElementCount = 0;
                     }
                     catch (NoSuchElementException ex)
                     {
-
+                        noSuchElementCount++;
+                        LoggerHelper.ContainerLog(_workStatusInfo[code].Container.ContainerName, ex.Message);
                     }
                     catch (Exception ex)
                     {
-
+                        LoggerHelper.ContainerLog(_workStatusInfo[code].Container.ContainerName, ex.Message);
+                    }
+                    finally
+                    {
+                        if (noSuchElementCount > 30)
+                        {
+                            isContinue = false;
+                        }
                     }
 
-                } while (result);
+                } while (isContinue);
             });
         }
     }

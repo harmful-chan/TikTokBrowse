@@ -23,25 +23,26 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using static TikTokBrowse.Hubstudio.HubstudioClient;
 using TikTokBrowse.Helper;
+using System.Data;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace TikTokBrowse
 {
-    public struct Pix 
-    {
-        public int screen;
-        public int index;
-    }
 
     public partial class MainForm : Form
     {
 
         private HubstudioClient _client = null;
         private Dictionary<string, BindingSource> _groupData = new Dictionary<string, BindingSource>();
-        private ConcurrentDictionary<string, ViewData> _viewData = new ConcurrentDictionary<string, ViewData>();
-        private Dictionary<string, Area> _area = new Dictionary<string, Area>();
-        private string _configFileName = null;
-        private readonly int[] _screenSqe = new int[] { 3, 2, 0, 1 };
+        private ConcurrentDictionary<string, RowData> _rowData = new ConcurrentDictionary<string, RowData>();
 
+        private string _oldTagTitle = "主页";
+        private readonly string[] 主页 = { "行为", "标签", "评论数", "LIKE数", "粉丝数", "博主", "进度", "发表评论" };
+        private readonly string[] 视频上传 = { "视频路径", "上传进度", "视频标题" };
+
+        //private readonly int[] _screenSqe = new int[] { 0, 3, 1, 2 };
+        private readonly int[] _screenSqe = new int[] { 1, 3, 1, 2 };
         public MainForm()
         {            
             //设置窗体的双缓冲
@@ -57,8 +58,13 @@ namespace TikTokBrowse
             // 允许跨线程更新UI
             CheckForIllegalCrossThreadCalls = false;
 
+            // 不要行头
+            gird.RowHeadersVisible = false;
+            gird.AutoGenerateColumns = false;
+            gird.AutoSize = true;
         }
 
+        // 获取屏幕定位
         public Pix GetPix()
         {
             int i = 0;
@@ -71,32 +77,54 @@ namespace TikTokBrowse
                     break;
                 }
             }
+            
             Pix p = new Pix();
-            p.screen = _screenSqe[i];
-            p.index = j;
+            p.Screen = _screenSqe[i];
+            p.Index = j;
 
             return p;
         }
 
         #region private
 
-        delegate void SetTextCallback(string id, string text);
-        private void Info(string id, string text)
+        /// <summary>
+        /// 追加窗口信息
+        /// </summary>
+        /// <param name="text"></param>
+        private void TxtLogAppend(string text)
         {
-            LoggerHelper.Info(id, text);
+            lock (txtLog)
+            {
+                if (!this.txtLog.Text.EndsWith("\r\n"))
+                {
+                    this.txtLog.AppendText("\r\n");
+                }
+                this.txtLog.AppendText(text);
+                this.txtLog.ScrollToCaret();
+            }
         }
 
-        private void Wait(string msg, bool isWait = false)
+        /// <summary>
+        /// 主窗口日志信息
+        /// </summary>
+        /// <param name="key">关键信息</param>
+        /// <param name="text">内容</param>
+        private void WindowsLog(string key, string text)
+        {
+            LoggerHelper.WindowsLog(key, text);
+            TxtLogAppend($"{key} | {text}");
+        }
+
+        /// <summary>
+        /// 等待信息
+        /// </summary>
+        /// <param name="msg">信息</param>
+        /// <param name="isWait">是否显示</param>
+        private void WaitLog(string msg, bool isWait = false)
         {
             this.lbWait.Visible = isWait;
             this.lbLog.Text = msg;
-            Info("主窗口", msg);
-
-        }
-
-        private void Message(string id, string text)
-        {
-            LoggerHelper.Message(id, text);
+            WindowsLog("主窗口", msg);
         }
         #endregion
 
@@ -108,7 +136,7 @@ namespace TikTokBrowse
         /// 不阻塞睡眠
         /// </summary>
         /// <param name="milliseconds"></param>
-        private void Sleep(int milliseconds)
+        private void ThreadSleep(int milliseconds)
         {
             DateTime now = DateTime.Now;
             while (now.AddMilliseconds(milliseconds) > DateTime.Now)
@@ -118,60 +146,124 @@ namespace TikTokBrowse
         }
 
         /// <summary>
-        /// 获取所选的行并排序
+        /// 获取已排序选中行
         /// </summary>
-        /// <returns></returns>
-        private List<DataGridViewRow> GetSortSelectedRows()
+        /// <returns>横内容</returns>
+        private List<RowData> GetSortSelectedViewDataList()
         {
             // 上到下排序
-            return gird.SelectedRows.Cast<DataGridViewRow>().OrderBy(p => p.Index).Select(p => p).ToList();
+            return gird.SelectedRows
+                .Cast<DataGridViewRow>()
+                .OrderBy(p => p.Index)
+                .Select(p => p.DataBoundItem as RowData)
+                .ToList();
         }
 
+        /// <summary>
+        /// 获取已点击选中行
+        /// </summary>
+        /// <returns>横内容</returns>
+        private List<RowData> GetSortCheckedRowDataList()
+        {
+            return (gird.DataSource as BindingSource).Cast<RowData>()
+                .Where(r => r.IsChoose).OrderBy(r => r.Index).ToList();
+        }
 
         /// <summary>
-        /// 根据分组名填充_data数据源，并更新表格
+        /// 使用容器组名刷新gird信息
         /// </summary>
-        /// <param name="tagName"></param>
+        /// <param name="tagName">组名</param>
+        /// <param name="isRefreshProxyStatus">是否刷新代理状态</param>
         /// <returns></returns>
-        private async Task RefreshGridDataByGroupNameAsync(string tagName = null)
+        private async Task RefreshGridDataByGroupNameAsync(string tagName = null, bool isRefreshProxyStatus = false)
         {
-            Wait("正在获取环境列表...", true);
+            WaitLog("正在获取环境列表...", true);
             btnChangeGroup.Enabled = false;
 
 
             Hubstudio.Models.Group[] groups = await _client.GetGroupsAsync();
             Hubstudio.Models.Group group = groups.Where(g => g.TagName == tagName).FirstOrDefault();
+            Hubstudio.Models.Container[] containers = await _client.GetContainersByGroupNameAsync(group.TagName);
             if (_groupData.ContainsKey(group.TagCode)&& _groupData[group.TagCode].Count > 0)
             {
                 gird.DataSource = _groupData[group.TagCode];
             }
             else
             {
-                Hubstudio.Models.Container[] containers = await _client.GetContainersByGroupNameAsync(group.TagName);
+                isRefreshProxyStatus = true;
                 BindingSource bs = _groupData[group.TagCode];
                 gird.DataSource = bs;
-                foreach (var item in containers)
+
+
+                for (int i = 0; i < containers.Length; i++)
                 {
-                    ViewData va = new ViewData();
-                    va.ContainerCode = item.ContainerCode;
-                    va.ContainerName = item.ContainerName;
+                    RowData va = new RowData();
                     bs.Add(va);
-                    _viewData[item.ContainerCode] = va;
+                    _rowData[containers[i].ContainerCode] = va;
+                    va.ContainerCode = containers[i].ContainerCode;
+                    va.ContainerName = containers[i].ContainerName;
+                    va.Index = i + 1;
+                    va.IsChoose = false;
                 }
+
+
             }
             btnChangeGroup.Enabled = true;
-            Wait("获取环境列表完成");
+            WaitLog("获取环境列表完成");
+
+            if (isRefreshProxyStatus)
+            {
+                RowData[] viewDatas = new RowData[_groupData[group.TagCode].Count];
+                for (int i = 0; i < viewDatas.Length; i++)
+                {
+                    viewDatas[i] = _groupData[group.TagCode][i] as RowData;
+                }
+                await RefreshProxytatusAsync(viewDatas);
+            }
+
+
         }
 
         /// <summary>
-        /// 获取所有分组信息，并填充到下拉框
+        /// 刷新代理状态
+        /// </summary>
+        /// <param name="rowDatas">行数据</param>
+        /// <returns></returns>
+        public async Task RefreshProxytatusAsync(RowData[] rowDatas)
+        {
+            string[] codes = Array.ConvertAll(rowDatas, v => { return v.ContainerCode; });
+            Hubstudio.Models.Container[] containers = await _client.GetContainersByCodeAsync(codes);
+  
+
+            foreach (var item in rowDatas)
+            {
+
+                item.ProxyStatus = NetworkResultTypes.None;// NetworkResultTypes.Unstable;
+                Hubstudio.Models.Container container = containers.Where(c => c.ContainerCode.Equals(item.ContainerCode)).FirstOrDefault();
+                if(container != null && !string.IsNullOrWhiteSpace(container.ProxyHost) && !string.IsNullOrWhiteSpace(container.ProxyPort))
+                {
+                    new Thread(async () =>
+                    {
+                        LoggerHelper.ContainerLog(container.ContainerName, "正在测试代理");
+                        string proxyHost = container.ProxyHost;
+                        string proxyPort = container.ProxyPort;
+                        item.ProxyStatus = await NetworkHelper.TcpTestAsync(proxyHost, int.Parse(proxyPort));
+                        LoggerHelper.ContainerLog(container.ContainerName, $"{item.ProxyStatus}");
+                    }).Start();
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// 刷新组信息
         /// </summary>
         /// <returns></returns>
         private async Task RefreshGroupInfoAsync()
         {
             if (_client.IsOpenConnector)
             {
-                Wait("正在获取分组列表...", true);
+                WaitLog("正在获取分组列表...", true);
                 Hubstudio.Models.Group[] groups = await _client.GetGroupsAsync();
                 // "Tiktok账号" 拍到最前
                 for (int i = 0; i < groups.Length; i++)
@@ -192,13 +284,13 @@ namespace TikTokBrowse
                 this.cbGroup.Items.Clear();
                 this.cbGroup.Items.AddRange(Array.ConvertAll(groups, g => g.TagName));
                 this.cbGroup.SelectedIndex = 0;
-                Wait("获取分组列表完成");
+                WaitLog("获取分组列表完成");
             }
 
         }
 
         /// <summary>
-        /// 打开货关闭连接器
+        /// 开启或者关闭连接器状态
         /// </summary>
         /// <returns></returns>
         private async Task<bool> SwitchConnectorAsync()
@@ -206,65 +298,113 @@ namespace TikTokBrowse
             if (!_client.IsOpenConnector)
             {
 
-                Wait("正在打开连接器...", true);
+                WaitLog("正在打开连接器...", true);
                 if( await _client.OpenConnectorAsync())
                 {
-                    Wait("打开连接器完成");
+                    WaitLog("打开连接器完成");
                     return true;
                 }
             }
             else
             {
-                Wait("正在关闭连接器...", true);
+                WaitLog("正在关闭连接器...", true);
                 if (_client.KillConnector())
                 {
-                    Wait("关闭连接器完成");
+                    WaitLog("关闭连接器完成");
                     return false;
                 }
             }
 
             return false;
         }
-        
+
         /// <summary>
-        /// 根据选择行，打开指定容器
+        /// 关闭容器
+        /// </summary>
+        /// <returns></returns>
+        private async Task CloseWebAsync()
+        {
+            foreach (var va in GetSortCheckedRowDataList())
+            {
+                if (_client.IsWork(va.ContainerCode))
+                {
+                    LoggerHelper.ContainerLog(va.ContainerName, "正在关闭环境...");
+                    WaitLog($"正在关闭环境...{va.ContainerName}，{va.ContainerCode}...", true);
+                    va.ContainerStatus = "关闭中...";
+                    if (await _client.CloseWebAsync(va.ContainerCode))
+                    {
+                        Pix pix = _client.GetAreaHolder(va.ContainerCode);
+                        _client.SetAvailableIndex(pix);
+                        va.ContainerStatus = "已关闭";
+                    }
+                    else
+                    {
+                        va.ContainerStatus = "关闭失败";
+                    }
+                    WaitLog($"关闭环境完成");
+                    LoggerHelper.ContainerLog(va.ContainerName, "关闭环境完成...");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 打开容器
         /// </summary>
         /// <returns></returns>
         private async Task OpenWebAsync()
         {
-
-            foreach (var item in GetSortSelectedRows())
+            foreach (var va in GetSortCheckedRowDataList())
             {
-                ViewData va = item.DataBoundItem as ViewData;
                 if (!_client.IsWork(va.ContainerCode))
                 {
                     Pix pix = GetPix();
                     //int index = _client.GetAvailableIndex(2);
                     //int index = pix.index;
-                    Rectangle area = _client.GetOrdinaryRectangle(pix.screen, pix.index);
-                    if (pix.index >= 0)
+                    Rectangle area = _client.GetOrdinaryRectangle(pix.Screen, pix.Index);
+                    if (pix.Index >= 0)
                     {
-                        Wait($"正在打开环境...{va.ContainerName}，{va.ContainerCode}...", true);
+                        LoggerHelper.ContainerLog(va.ContainerName, "正在打开环境...");
+                        WaitLog($"正在打开环境...{va.ContainerName}，{va.ContainerCode}...", true);
                         va.ContainerStatus = "打开中...";
-                        if (await _client.OpenWebAsync(va.ContainerCode, area))
+
+                        Hubstudio.Models.Container[] containers = await _client.GetContainersByCodeAsync(va.ContainerCode);
+                        string ret = await NetworkHelper.TcpTestAsync(containers[0].ProxyHost, int.Parse(containers[0].ProxyPort));
+                        if (ret.Equals(NetworkResultTypes.Success) && await _client.OpenWebAsync(va.ContainerCode, area))
                         {
-                            _client.SetAreaHolder(pix.screen, pix.index, va.ContainerCode);
-                            va.ContainerPosition = $"{pix.screen}|{pix.index}";
+                            _client.SetAreaHolder(pix, va.ContainerCode);
+                            int i = 0;
+                            for (; i < _screenSqe.Length; i++)
+                            {
+                                if( _screenSqe[i] == pix.Screen)
+                                {
+                                    break;
+                                }
+                            }
+                            va.ContainerPosition = $"{i} | {pix.Index}";
                             va.ContainerStatus = "已打开";
-                            _client.CycleWork(va.ContainerCode, IsReadyWait);
+                            _client.CycleWork(va.ContainerCode, OpenWebReadyWait);
                         }
                         else
                         {
                             va.ContainerStatus = "打开失败";
                         }
-                        Wait($"打开环境完成");
+                        WaitLog($"打开环境完成");
+                        LoggerHelper.ContainerLog(va.ContainerName, "打开环境完成");
                     } 
 
 
                 }
             }
         }
-        private void IsReadyWait(TikTokActuator actuator, ref bool isContinue, ref int count)
+
+        /// <summary>
+        /// 打开容器等待循环
+        /// </summary>
+        /// <param name="actuator">执行器</param>
+        /// <param name="isContinue">是否继续</param>
+        /// <param name="count">循环计数</param>
+        /// <param name="err">错误计数</param>
+        private void OpenWebReadyWait(TikTokActuator actuator, ref bool isContinue, ref int count, ref int err)
         {
             Trace(actuator.Id, ActionTypes.WAIT_READY);
             try
@@ -274,7 +414,6 @@ namespace TikTokBrowse
                     Trace(actuator.Id, ActionTypes.WAIT_READY_FINISH);
                     isContinue = false;
                     return;
-
                 }
                 else if(count < 5 )
                 {
@@ -282,7 +421,6 @@ namespace TikTokBrowse
                     isContinue = false;
                     return;
                 }
-                
             }
             catch(Exception ex)
             {
@@ -293,78 +431,60 @@ namespace TikTokBrowse
         }
 
         /// <summary>
-        /// 根据选择行，关闭指定容器
+        /// 行为记录
         /// </summary>
-        /// <returns></returns>
-        private async Task CloseWeb()
-        {
-            foreach (var item in GetSortSelectedRows())
-            {
-                ViewData va = item.DataBoundItem as ViewData;
-                if (_client.IsWork(va.ContainerCode))
-                {
-                    Wait($"正在关闭环境...{va.ContainerName}，{va.ContainerCode}...", true);
-                    va.ContainerStatus = "关闭中...";
-                    if (await _client.CloseWebAsync(va.ContainerCode))
-                    {
-
-                        va.ContainerStatus = "已关闭";
-                    }
-                    else
-                    {
-                        va.ContainerStatus = "关闭失败";
-                    }
-                    Wait($"关闭环境完成");
-                }
-            }
-        }
-
+        /// <param name="id">容器ID</param>
+        /// <param name="act">行为</param>
+        /// <param name="wait"></param>
         private void Trace(string id, ActionTypes act, int wait = 0)
         {
             switch (act)
             {
-                //Log(id, $"
-                case ActionTypes.JUMP_WEBSITE: Info(id, $"{_viewData[id].ContainerStatus = "正在跳转"}"); break;
-                case ActionTypes.JUMP_WEBSITE_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "跳转完成"}"); break;
-                case ActionTypes.LOGIN_ACCOUNT: Info(id, $"{_viewData[id].ContainerStatus = "正在登录"}"); break;
-                case ActionTypes.LOGIN_ACCOUNT_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "登录完成"}"); break;
-                case ActionTypes.BIG_SCREEN_MODE: Info(id, $"{_viewData[id].ContainerStatus = "正在进入大屏模式"}"); break;
-                case ActionTypes.BIG_SCREEN_MODE_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "进入大屏模式完成"}"); break;
-                case ActionTypes.EXIT_BIG_SCREEN_MODE: Info(id, $"{_viewData[id].ContainerStatus = "正在退出大屏模式"}"); break;
-                case ActionTypes.EXIT_BIG_SCREEN_MODE_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "退出大屏模式完成"}"); break;
-                case ActionTypes.RESIZE_BROWSE: Info(id, $"{_viewData[id].ContainerStatus = "重置窗口位置"}"); break;
-                case ActionTypes.RESIZE_BROWSE_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "重置窗口位置完成"}"); break;
-                case ActionTypes.WAIT_READY: Info(id, $"{_viewData[id].ContainerStatus = "正在准备网页"}"); break;
-                case ActionTypes.WAIT_READY_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "准备网页完成"}"); break;
-                case ActionTypes.NEXT_VIDEO: Info(id, $"{_viewData[id].ContainerStatus = "正在跳转下一条视频"}"); break;
-                case ActionTypes.NEXT_VIDEO_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "跳转下一条视频完成"}"); break;
-                case ActionTypes.PREVIOUS_VIDEO: Info(id, $"{_viewData[id].ContainerStatus = "正在跳转上一条视频"}"); break;
-                case ActionTypes.PREVIOUS_VIDEO_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "跳转上一条视频完成"}"); break;
-                case ActionTypes.UPDATE_BLOGGER_DATA: Info(id, $"{_viewData[id].ContainerStatus = "正在更新博主数据"}"); break;
-                case ActionTypes.VIDEO_LIKE: Info(id, $"{_viewData[id].ContainerStatus = "正在点赞"}"); break;
-                case ActionTypes.VIDEO_LIKE_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "点赞完成"}"); break;
-                case ActionTypes.VIDEO_FOLLOW: Info(id, $"{_viewData[id].ContainerStatus = "正在关注"}"); break;
-                case ActionTypes.VIDEO_FOLLOW_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "关注完成"}"); break;
-                case ActionTypes.PUSH_COMMENT: Info(id, $"{_viewData[id].ContainerStatus = "正在发表评论"}"); break;
-                case ActionTypes.PUSH_COMMENT_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "发表评论完成"}"); break;
-                case ActionTypes.UPDATE_BLOGGER_DATA_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "更新博主数据完成"}"); break;
+                case ActionTypes.JUMP_WEBSITE: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在跳转"}"); break;
+                case ActionTypes.JUMP_WEBSITE_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "跳转完成"}"); break;
+                case ActionTypes.LOGIN_ACCOUNT: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在登录"}"); break;
+                case ActionTypes.LOGIN_ACCOUNT_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "登录完成"}"); break;
+                case ActionTypes.BIG_SCREEN_MODE: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在进入大屏模式"}"); break;
+                case ActionTypes.BIG_SCREEN_MODE_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "进入大屏模式完成"}"); break;
+                case ActionTypes.EXIT_BIG_SCREEN_MODE: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在退出大屏模式"}"); break;
+                case ActionTypes.EXIT_BIG_SCREEN_MODE_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "退出大屏模式完成"}"); break;
+                case ActionTypes.RESIZE_BROWSE: WindowsLog(id, $"{_rowData[id].ContainerStatus = "重置窗口位置"}"); break;
+                case ActionTypes.RESIZE_BROWSE_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "重置窗口位置完成"}"); break;
+                case ActionTypes.WAIT_READY: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在准备网页"}"); break;
+                case ActionTypes.WAIT_READY_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "准备网页完成"}"); break;
+                case ActionTypes.NEXT_VIDEO: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在跳转下一条视频"}"); break;
+                case ActionTypes.NEXT_VIDEO_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "跳转下一条视频完成"}"); break;
+                case ActionTypes.PREVIOUS_VIDEO: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在跳转上一条视频"}"); break;
+                case ActionTypes.PREVIOUS_VIDEO_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "跳转上一条视频完成"}"); break;
+                case ActionTypes.UPDATE_BLOGGER_DATA: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在更新博主数据"}"); break;
+                case ActionTypes.VIDEO_LIKE: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在点赞"}"); break;
+                case ActionTypes.VIDEO_LIKE_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "点赞完成"}"); break;
+                case ActionTypes.VIDEO_FOLLOW: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在关注"}"); break;
+                case ActionTypes.VIDEO_FOLLOW_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "关注完成"}"); break;
+                case ActionTypes.PUSH_COMMENT: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在发表评论"}"); break;
+                case ActionTypes.PUSH_COMMENT_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "发表评论完成"}"); break;
+                case ActionTypes.UPDATE_BLOGGER_DATA_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "更新博主数据完成"}"); break;
                 case ActionTypes.UPDATE_PLAY_BAR:/* Log(id, $"{_viewData[id].ContainerStatus = "正在更新视频进度"}");*/ break;
                 case ActionTypes.UPDATE_PLAY_BAR_FINISH: /* Log(id, $"{_viewData[id].ContainerStatus = "更新视频进度完成"}"); */ break;
-                case ActionTypes.EXTRACT_COMMENTS: Info(id, $"{_viewData[id].ContainerStatus = "正在提取评论"}"); break;
-                case ActionTypes.EXTRACT_COMMENTS_FINISH: Info(id, $"{_viewData[id].ContainerStatus = "提取评论完成"}"); break;
-                case ActionTypes.ELEMENT_NOT_FOUND: Info(id, $"{_viewData[id].ContainerStatus = _viewData[id].ContainerStatus + "_ELEMENT_NOT_FOUND"}"); break;
-                case ActionTypes.ERROR: Info(id, $"{_viewData[id].ContainerStatus = _viewData[id].ContainerStatus + "_ERROR"}"); break;
+                case ActionTypes.EXTRACT_COMMENTS: WindowsLog(id, $"{_rowData[id].ContainerStatus = "正在提取评论"}"); break;
+                case ActionTypes.EXTRACT_COMMENTS_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "提取评论完成"}"); break;
+                case ActionTypes.ELEMENT_NOT_FOUND: WindowsLog(id, $"{_rowData[id].ContainerStatus = _rowData[id].ContainerStatus + "_ELEMENT_NOT_FOUND"}"); break;
+                case ActionTypes.ERROR: WindowsLog(id, $"{_rowData[id].ContainerStatus = _rowData[id].ContainerStatus + "_ERROR"}"); break;
  
                 default: break;
             }
         }
  
+        /// <summary>
+        /// 运行简单任务
+        /// </summary>
+        /// <param name="start">开始动作</param>
+        /// <param name="end">结束动作</param>
+        /// <param name="actuator">执行器</param>
         private void RunTrace(ActionTypes start, ActionTypes end,  ActuatorEventDelegate actuator)
         {
-            foreach (var item in GetSortSelectedRows())
+            foreach (var va in GetSortCheckedRowDataList())
             {
-                ViewData va = item.DataBoundItem as ViewData;
-
                 _client.SingleWorks(va.ContainerCode, (a) => 
                 {
                     Trace(va.ContainerCode, start);
@@ -374,45 +494,20 @@ namespace TikTokBrowse
             }
         }
 
+        /// <summary>
+        /// 初始化应用配置及变量
+        /// </summary>
+        /// <returns></returns>
         private bool InitApp()
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(txtConfigFileName.Text) || !File.Exists(txtConfigFileName.Text))
+                string cfgPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.json");
+                if (File.Exists(cfgPath))
                 {
-                    Wait("未设置 配置文件 路径");
-                    OpenFileDialog openFileDialog = new OpenFileDialog();
-                    openFileDialog.InitialDirectory = @"D:\Program Files\Hubstudio\2.19.0.1";
-                    openFileDialog.Title = "请选择配置文件";
-                    openFileDialog.Filter = "所有文件(*.*)|*.*";
-                    if (openFileDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        _configFileName = openFileDialog.FileName;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    AppData appData = TextHelper.Extract<AppData>(cfgPath);
+                    _client = new HubstudioClient(appData.HubStudioConnectorFileName, appData.HubStudioSecret);
                 }
-                _configFileName = txtConfigFileName.Text;
-                
-                AppData appData = TextHelper.Extract<AppData>(_configFileName);
-                if(appData == null)
-                {
-                    TextHelper.Storage(new AppData(), _configFileName);
-                    return false;
-                }else if(string.IsNullOrWhiteSpace(appData.HubStudioConnectorFileName))
-                {
-                    return false;
-                }
-                
-                if(string.IsNullOrWhiteSpace(appData.ConfigFileName))
-                {
-                    appData.ConfigFileName = _configFileName;
-                    TextHelper.Storage<AppData>(appData, _configFileName);
-                    txtConfigFileName.Text = _configFileName;
-                }
-                _client = new HubstudioClient(appData.HubStudioConnectorFileName, appData.HubStudioSecret);
             }catch(Exception ex)
             {
                 return false;
@@ -420,25 +515,90 @@ namespace TikTokBrowse
             return true;
         }
 
+        /// <summary>
+        /// 更新博主数据
+        /// </summary>
+        /// <param name="id">容器ID</param>
+        /// <param name="value">值</param>
         private void UploadBloggerData(string id, object value)
         {
             if (value != null)
             {
                 VideoData bd = value as VideoData;
-                _viewData[id].BloggerName = bd.BloggerNickName;
-                _viewData[id].FollowerNumber = bd.BloggerFollwers;
-                _viewData[id].LikeNumber = bd.LikeNumber;
-                _viewData[id].CommentNumber = bd.CommentNumber;
+                _rowData[id].BloggerName = bd.BloggerNickName;
+                _rowData[id].FollowerNumber = bd.BloggerFollwers;
+                _rowData[id].LikeNumber = bd.LikeNumber;
+                _rowData[id].CommentNumber = bd.CommentNumber;
             }
         }
 
+        /// <summary>
+        /// 更新视频数据
+        /// </summary>
+        /// <param name="id">容器ID</param>
+        /// <param name="value">视频数据</param>
         private void UploadVideoProgress(string id, object value)
         {
             if (value != null)
             {
-                _viewData[id].VideoProgress = value as string;
+                _rowData[id].VideoProgress = value as string;
             }
         }
+
+        /// <summary>
+        /// 切换tab控件标签
+        /// </summary>
+        /// <param name="tagPageName">显示tab便签</param>
+        private void SwitchGird(string tagPageName)
+        {
+            if(  tagPageName.Equals("主页"))
+            {
+                HideGridViewColumn(视频上传);
+                ShowGridViewColumn(主页);
+            }
+            if (tagPageName.Equals("视频上传"))
+            {
+                HideGridViewColumn(主页);
+                ShowGridViewColumn(视频上传);
+            }
+        }
+
+        /// <summary>
+        /// 显示表格列
+        /// </summary>
+        /// <param name="headerText">表格列</param>
+        private void ShowGridViewColumn(params string[] headerText)
+        {
+            foreach (var item in gird.Columns)
+            {
+                if (item is DataGridViewTextBoxColumn col)
+                {
+                    if (headerText.Contains(col.HeaderText))
+                    {
+                        (item as DataGridViewColumn).Visible = true;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 隐藏表格列
+        /// </summary>
+        /// <param name="headerText">表格列</param>
+        private void HideGridViewColumn(params string[] headerText)
+        {
+            foreach (var item in gird.Columns)
+            {
+                if( item is DataGridViewTextBoxColumn col)
+                {
+                    if(headerText.Contains(col.HeaderText))
+                    {
+                        (item as DataGridViewColumn).Visible = false;
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #region 界面
@@ -446,9 +606,9 @@ namespace TikTokBrowse
         private void gird_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
         {
             //获取行对象
-            var row = gird.Rows[e.RowIndex];
+            //var row = gird.Rows[e.RowIndex];
             //对行的第一列value赋值
-            row.Cells[0].Value = row.Index + 1;
+            //row.Cells[1].Value = row.Index + 1;
         }
 
 
@@ -493,17 +653,242 @@ namespace TikTokBrowse
         }
         #endregion
 
+        #region 按键功能
+        private async void btnChangeGroup_Click(object sender, EventArgs e)
+        {
+            await RefreshGridDataByGroupNameAsync(this.cbGroup.Text);
+        }
+
+        private void gird_MouseUp(object sender, MouseEventArgs e)
+        {
+
+            List<RowData> viewDatas = GetSortSelectedViewDataList();
+            if (viewDatas.Count == 1)
+            {
+                RowData viewData = viewDatas.First();
+                viewData.IsChoose = !viewData.IsChoose;
+            }
+            else if (viewDatas.Count > 1)
+            {
+                viewDatas.ForEach(d => d.IsChoose = true);
+                gird.ClearSelection();
+            }
+        }
+
+        private void gird_MouseLeave(object sender, EventArgs e)
+        {
+            gird.ClearSelection();
+        }
+
+        private async void btnOpenWeb_Click(object sender, EventArgs e)
+        {
+            await OpenWebAsync();
+        }
+
+        private async void btnCloseWeb_Click(object sender, EventArgs e)
+        {
+            await CloseWebAsync();
+        }
+
+        private void btnJump_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.JUMP_WEBSITE, ActionTypes.JUMP_WEBSITE_FINISH, (actuator) =>
+            {
+                actuator.JumpWebsite();
+            });
+        }
+
+        private async void btnTestProxy_Click(object sender, EventArgs e)
+        {
+            await RefreshProxytatusAsync(GetSortCheckedRowDataList().ToArray());
+
+        }
+
+        private void btnResizeWeb_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.RESIZE_BROWSE, ActionTypes.RESIZE_BROWSE_FINISH, (actuator) =>
+            {
+                actuator.Resize(new Rectangle());
+            });
+        }
+
+        private void btnOpenScreen_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.BIG_SCREEN_MODE, ActionTypes.BIG_SCREEN_MODE_FINISH, (actuator) =>
+            {
+                actuator.BigScreenMode();
+            });
+        }
+
+        private void btnCloseScreen_Click(object sender, EventArgs e)
+        {
+
+            RunTrace(ActionTypes.EXIT_BIG_SCREEN_MODE, ActionTypes.EXIT_BIG_SCREEN_MODE_FINISH, (actuator) =>
+            {
+                actuator.ExitBigScreenMode();
+            });
+        }
+
+        private void btnNextVedio_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.NEXT_VIDEO, ActionTypes.NEXT_VIDEO_FINISH, (actuator) =>
+            {
+                actuator.NextVideo();
+            });
+        }
+
+        private void btnPreviousVideo_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.PREVIOUS_VIDEO, ActionTypes.PREVIOUS_VIDEO_FINISH, (actuator) =>
+            {
+                actuator.PreviousVideo();
+            });
+        }
+
+        private void btnGetBloggerData_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.UPDATE_BLOGGER_DATA, ActionTypes.UPDATE_BLOGGER_DATA_FINISH, (actuator) =>
+            {
+                VideoData videoData = actuator.GetVideoData();
+                UploadBloggerData(actuator.Id, videoData);
+            });
+        }
+
+        private void btnGetVideoBar_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.UPDATE_PLAY_BAR, ActionTypes.UPDATE_PLAY_BAR_FINISH, (actuator) =>
+            {
+                string bar = actuator.GetPlayBarData();
+                UploadBloggerData(actuator.Id, bar);
+            });
+        }
+
+        private void btnLike_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.VIDEO_LIKE, ActionTypes.VIDEO_LIKE_FINISH, (actuator) =>
+            {
+                actuator.LikeButton().Click();
+            });
+        }
+
+        private void btnFollower_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.VIDEO_FOLLOW, ActionTypes.VIDEO_FOLLOW_FINISH, (actuator) =>
+            {
+                actuator.FollowButton().Click();
+            });
+        }
+
+        private void btnAutoWork_Click(object sender, EventArgs e)
+        {
+            foreach (var va in GetSortCheckedRowDataList())
+            {
+                _client.CycleWork(va.ContainerCode, MainLoop);
+            }
+        }
+
+        private void btnComment_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.PUSH_COMMENT, ActionTypes.PUSH_COMMENT_FINISH, (actuator) =>
+            {
+                actuator.PushCommentData("123456");
+            });
+        }
+
+        #endregion
+
+        /// <summary>
+        /// 自动浏览主循环
+        /// </summary>
+        /// <param name="actuator">执行器</param>
+        /// <param name="isContinue">是否持续</param>
+        /// <param name="ok">总计数</param>
+        /// <param name="err">错误技术</param>
+        private void MainLoop(TikTokActuator actuator, ref bool isContinue, ref int ok, ref int err)
+        {
+            RowData row = _rowData[actuator.Id] as RowData;
+            lock (row)
+            {
+                Thread.Sleep(500);
+                string bloggerNickName = actuator.GetBloggerNickName();
+                string bar = actuator.GetPlayBarData();
+                UploadVideoProgress(actuator.Id, bar);
+
+
+                VideoData video = null;
+                bool isUploadBollger = false;
+
+                // 20分钟重新进入页面
+                if (ok >= 1200)
+                {
+                    LoggerHelper.ContainerLog(row.ContainerName, "重新进入tk主页");
+                    Trace(actuator.Id, ActionTypes.JUMP_WEBSITE);
+                    actuator.JumpWebsite();
+                    ok = 0;
+                }
+
+                // 数据行与实际观看视频不符合
+                if (string.IsNullOrWhiteSpace(row.BloggerName) || !row.BloggerName.Equals(bloggerNickName))
+                {
+                    LoggerHelper.ContainerLog(row.ContainerName, $"显示{row.BloggerName} 当前{bloggerNickName}");
+                    isUploadBollger = true;
+                }
+
+
+                // 根据进度条
+                if (!string.IsNullOrWhiteSpace(row.VideoProgress))
+                {
+                    double rate;
+                    string str = row.VideoProgress.Replace(" ", "").Replace("%", "");
+                    if (double.TryParse(str, out rate))
+                    {
+                        if (rate > 30)
+                        {
+                            LoggerHelper.ContainerLog(row.ContainerName, "进度大于30%，下一个视频");
+                            Trace(actuator.Id, ActionTypes.NEXT_VIDEO);
+                            actuator.NextVideo();
+                            isUploadBollger = true;
+                        }
+                    }
+                }
+
+                if (isUploadBollger)
+                {
+                    LoggerHelper.ContainerLog(row.ContainerName, "更新视频数据");
+                    video = actuator.GetVideoData();
+                    LoggerHelper.ContainerLog(row.ContainerName, video.BloggerNickName);
+                    Trace(actuator.Id, ActionTypes.UPDATE_BLOGGER_DATA);
+                    UploadBloggerData(actuator.Id, video);
+                }
+
+                if (video != null)
+                {
+                    //TagData[] tagDatas = new TagUtil().Identify(videoData.TitleTags);
+                    Tag[] tagDatas = TikTokBrowse.Models.Tag.Converts(video.TitleTags);
+                    string tag = "";
+                    foreach (var data in tagDatas)
+                    {
+                        tag += data.ToString() + " ";
+                    }
+                    LoggerHelper.ContainerLog(row.ContainerName, $"更新tag,{tag}");
+                    row.Tag = tag;
+                }
+            }
+        }
+
+
         private async void Form1_LoadAsync(object sender, EventArgs e)
         {
             if (InitApp())
             {
-                gird.AutoGenerateColumns = false;
-                gird.AutoSize = true;
                 // 自动执行
                 if (await SwitchConnectorAsync())
                 {
                     await RefreshGroupInfoAsync();
                     await RefreshGridDataByGroupNameAsync(this.cbGroup.Text);
+                    SwitchGird("主页");
+                    string[] category = new VideoHelper().GetTitleCategory();
+                    this.cbTitleCategory.DataSource = category;
                 }
             }
             else
@@ -513,185 +898,79 @@ namespace TikTokBrowse
             }
         }
 
-        private async void btnChangeGroup_Click(object sender, EventArgs e) => await RefreshGridDataByGroupNameAsync(this.cbGroup.Text);
-
-        private async void 打开环境ToolStripMenuItem_Click(object sender, EventArgs e) => await OpenWebAsync();
-
-        private async void 关闭环境ToolStripMenuItem_Click(object sender, EventArgs e) => await CloseWeb();
-
-        private void 下一个视频ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            RunTrace(ActionTypes.NEXT_VIDEO, ActionTypes.NEXT_VIDEO_FINISH, (actuator) => 
+            TabControl tab = sender as TabControl;
+            string text = tab.SelectedTab.Text;
+            if (!text.Equals(_oldTagTitle))
             {
-                actuator.NextVideo();
-            });
-        }
-
-        private void 上一个视频toolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RunTrace(ActionTypes.PREVIOUS_VIDEO, ActionTypes.PREVIOUS_VIDEO_FINISH, (actuator) =>
-            {
-                actuator.PreviousVideo();
-            });
-        }
-
-        private void 获取视频数据ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RunTrace(ActionTypes.UPDATE_BLOGGER_DATA, ActionTypes.UPDATE_BLOGGER_DATA_FINISH, (actuator) =>
-            {
-                VideoData videoData = actuator.GetVideoData();
-                UploadBloggerData(actuator.Id, videoData);
-            });
-        }
-
-        private void 获取视频进度ToolStripMenuItem_Click(object sender, EventArgs e) 
-        {
-            RunTrace(ActionTypes.UPDATE_PLAY_BAR, ActionTypes.UPDATE_PLAY_BAR_FINISH, (actuator) =>
-            {
-                string bar = actuator.GetPlayBarData();
-                UploadBloggerData(actuator.Id, bar);
-            });
-        }
-
-        private void 点赞ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RunTrace(ActionTypes.VIDEO_LIKE, ActionTypes.VIDEO_LIKE_FINISH, (actuator) =>
-            {
-                actuator.LikeButton().Click();
-            });
-        }
-
-        private void 评论ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RunTrace(ActionTypes.PUSH_COMMENT, ActionTypes.PUSH_COMMENT_FINISH, (actuator) =>
-            {
-                actuator.PushCommentData("123456");
-            });
-        }
-
-        private void 关注ToolStripMenuItem_Click_1(object sender, EventArgs e)
-        {
-            RunTrace(ActionTypes.VIDEO_FOLLOW, ActionTypes.VIDEO_FOLLOW_FINISH, (actuator) =>
-            {
-                actuator.FollowButton().Click();
-            });
-        }
-
-        private void 重置窗口大小_Click(object sender, EventArgs e)
-        {
-            RunTrace(ActionTypes.RESIZE_BROWSE, ActionTypes.RESIZE_BROWSE_FINISH, (actuator) =>
-            {
-                actuator.Resize(new Rectangle());
-            });
-        }
-
-        private void 开启ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-            RunTrace(ActionTypes.BIG_SCREEN_MODE, ActionTypes.BIG_SCREEN_MODE_FINISH, (actuator) =>
-            {
-                actuator.BigScreenMode();
-            });
-        }
-
-        private void 关闭ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-            RunTrace(ActionTypes.EXIT_BIG_SCREEN_MODE, ActionTypes.EXIT_BIG_SCREEN_MODE_FINISH, (actuator) =>
-            {
-                actuator.ExitBigScreenMode();
-            });
-        }
-
-
-        private void 分析视频权重ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            foreach (var item in GetSortSelectedRows())
-            {
-                ViewData viewData = item.DataBoundItem as ViewData;
-                _client.CycleWork(viewData.ContainerCode, MainLoop);
+                SwitchGird(text);
+                _oldTagTitle = text;
             }
-
         }
 
-        private void MainLoop(TikTokActuator actuator, ref bool isContinue, ref int count)
+        private void button1_Click(object sender, EventArgs e)
         {
-            ViewData row = _viewData[actuator.Id];
-            string bloggerNickName = actuator.GetBloggerNickName();
-
-            VideoData video = null;
-            bool isUploadBollger = false;
-
-            // 20分钟重新进入页面
-            if(count >= 1200)
+            foreach (var va in GetSortCheckedRowDataList())
             {
-                Info($"{row.ContainerCode} : {row.ContainerName}", "重新进入tk主页");
-                actuator.JumpWebsite();
-                count = 0;
-            }
-
-            // 数据行与实际观看视频不符合
-            if (string.IsNullOrWhiteSpace(row.BloggerName) || !row.BloggerName.Equals(bloggerNickName))
-            {
-                isUploadBollger = true;
+                _client.SingleWorks(va.ContainerCode, UploadVideo);
             }
 
 
-            // 根据进度条
-            if (!string.IsNullOrWhiteSpace(row.VideoProgress))
-            {
-                double rate;
-                string str = row.VideoProgress.Replace(" ", "").Replace("%", "");
-                if (double.TryParse(str, out rate))
-                {
-                    if (rate > 30)
-                    {
-                        Info($"{row.ContainerCode} : {row.ContainerName}", "进度大于30%，下一个视频");
-                        Trace(actuator.Id, ActionTypes.NEXT_VIDEO);
-                        actuator.NextVideo();
-                        isUploadBollger = true;
-                    }
-                }
-            }
-
-            if (isUploadBollger)
-            {
-                video = actuator.GetVideoData();
-                Info($"{row.ContainerCode} : {row.ContainerName}", $"更新视频数据, {video.BloggerNickName}");
-                Trace(actuator.Id, ActionTypes.UPDATE_BLOGGER_DATA);
-                UploadBloggerData(actuator.Id, video);
-            }
-
-            if (video != null)
-            {
-                //TagData[] tagDatas = new TagUtil().Identify(videoData.TitleTags);
-                Tag[] tagDatas =  TikTokBrowse.Models.Tag.Converts(video.TitleTags);
-                string tag = "";
-                foreach (var data in tagDatas)
-                {
-                    tag += data.ToString() + " ";
-                }
-                Info($"{row.ContainerCode} : {row.ContainerName}", $"更新视频数据, {tag}");
-                row.Tag = tag;
-
-            }
-
-            string bar = actuator.GetPlayBarData();
-            UploadVideoProgress(actuator.Id, bar);
-
-            Thread.Sleep(500);
-
-            isContinue = true;
-        }
-
-        private void 跳转ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
             RunTrace(ActionTypes.JUMP_WEBSITE, ActionTypes.JUMP_WEBSITE_FINISH, (actuator) =>
             {
-                actuator.JumpWebsite();
+                string dir = "";
+                lock (_client)
+                {
+                    dir = _client.GetContainerDirectory(actuator.Id);
+                }
+            
+                dir = Path.Combine(dir, "20230304 (1).mp4");
+                //actuator.UploadForm().SendKeys(dir);
+                //actuator.UploadForm().Submit();
+            
             });
         }
 
+        private void UploadVideo(TikTokActuator actuator)
+        {
+            string videoFileName = "";
+            string dir;
+            lock (_client)
+            {
+                dir = _client.GetContainerDirectory(actuator.Id);
+            }
 
+            string[] fileNames = new VideoHelper().GetDailyVideoFileName(dir);
+            if (fileNames == null || fileNames.Length <= 0)
+            {
+                Trace(actuator.Id, ActionTypes.UPLOAD_VIDEO_NOT_EXIST);
+                return;
+            }
+            videoFileName = fileNames.First();
+
+            Trace(actuator.Id, ActionTypes.UPLOAD_VIDEO);
+            Trace(actuator.Id, ActionTypes.JUMP_WEBSITE);
+            actuator.JumpUploadSite();
+            int i = 0;
+            do
+            {
+                actuator.UploadButton()?.Click();
+                IntPtr intPtr = actuator.FindUploadDialog();
+                if (intPtr != null)
+                {
+                    actuator.UploadFile(intPtr, videoFileName);
+                }
+
+                IWebElement webElement = actuator.UploadButton();
+                IWebElement webElement1 = actuator.PreviewPlayer();
+                IWebElement webElement2 = actuator.CanelButton();
+                IWebElement webElement3 = actuator.PostButton();
+                string v = actuator.GetVideoTitle();
+
+            } while (++i < 10);
+
+
+        }
     }
 }
