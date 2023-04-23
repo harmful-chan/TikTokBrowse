@@ -29,7 +29,7 @@ namespace TikTokBrowse.Hubstudio
         private string _groupCode;
         private string _appSecret;
         private string _localAddress;
-        private string _connectorFileName;        
+        private string _connectorFileName;
         private ConcurrentDictionary<string, WorkStatus> _workStatusInfo = new ConcurrentDictionary<string, WorkStatus>();
         private ConcurrentDictionary<int, string[]> _workArea = new ConcurrentDictionary<int, string[]>();
         public delegate void ActuatorEventDelegate(TikTokActuator actuator);
@@ -54,7 +54,7 @@ namespace TikTokBrowse.Hubstudio
 
             _screenCount = Screen.AllScreens.Count();
             _screenContainerCount = 10; // 2行，每行5个
-            
+
             for (int i = 0; i < _screenCount; i++)
             {
                 _workArea[i] = new string[_screenContainerCount];
@@ -63,8 +63,8 @@ namespace TikTokBrowse.Hubstudio
                     _workArea[i][j] = "";
                 }
             }
-            
-            
+
+
             ThreadPool.SetMaxThreads(50, 50);
         }
 
@@ -75,7 +75,7 @@ namespace TikTokBrowse.Hubstudio
         }
 
         #region 连接器
-        public async Task<bool> OpenConnectorAsync()
+        public async Task<bool> OpenConnectorAsync()  // 连接浏览器黑窗口
         {
             try
             {
@@ -105,7 +105,7 @@ namespace TikTokBrowse.Hubstudio
 
 
                     // 等待端口可用
-                    return await Task.Run(async ()=>
+                    return await Task.Run(async () =>
                     {
                         while (true)
                         {
@@ -150,7 +150,7 @@ namespace TikTokBrowse.Hubstudio
             }
             catch (Exception ex)
             {
-                
+
             }
             return false;
         }
@@ -161,7 +161,7 @@ namespace TikTokBrowse.Hubstudio
         {
             return await JsonRequestAsync<Group[]>($"{_localAddress}/api/v1/group/list", null, ".data");
         }
-        
+
         public async Task<Container[]> GetContainersByGroupNameAsync(params string[] tagNames)
         {
             string tag = JsonConvert.SerializeObject(tagNames);
@@ -171,7 +171,7 @@ namespace TikTokBrowse.Hubstudio
                 $"\n}}";
             return await JsonRequestAsync<Container[]>($"{_localAddress}/api/v1/env/list", body, "..data.list");
         }
-        
+
         public async Task<Container[]> GetContainersByCodeAsync(params string[] containerCodes)
         {
             string tag = JsonConvert.SerializeObject(containerCodes);
@@ -179,7 +179,7 @@ namespace TikTokBrowse.Hubstudio
                 $"\n\t\"containerCodes\":{tag}," +
                 $"\n\t\"size\":150" +
                 $"\n}}";
-            return await JsonRequestAsync<Container[]>($"{_localAddress}/api/v1/env/list", body, "..data.list" );
+            return await JsonRequestAsync<Container[]>($"{_localAddress}/api/v1/env/list", body, "..data.list");
         }
 
         public async Task<bool> OpenWebAsync(string containerCode, Rectangle area)
@@ -195,7 +195,7 @@ namespace TikTokBrowse.Hubstudio
             {
 
                 Hubstudio.Models.Container[] containers = await GetContainersByCodeAsync(containerCode);
-                ChromeDriver chromeDriver = GetChromeDriver(web);
+              ChromeDriver chromeDriver = GetChromeDriver(web);
                 WorkStatus wc = new WorkStatus();
                 wc.Web = web;
                 wc.Container = containers[0];
@@ -213,11 +213,11 @@ namespace TikTokBrowse.Hubstudio
             }
             return false;
         }
-        
+
         public async Task<bool> CloseWebAsync(string containerCode)
         {
             string body = $"containerCode={containerCode}";
-            if( 0 == await JsonRequestAsync<int>($"{_localAddress}/api/v1/browser/stop", body, ".code", method: "GET"))
+            if (0 == await JsonRequestAsync<int>($"{_localAddress}/api/v1/browser/stop", body, ".code", method: "GET"))
             {
                 WorkStatus workContainerInfo;
                 _workStatusInfo.TryRemove(containerCode, out workContainerInfo);
@@ -228,7 +228,7 @@ namespace TikTokBrowse.Hubstudio
             }
             return false;
         }
-        
+
         private T JsonRequest<T>(string url, string body = null, string responseToken = null, string method = "POST")
         {
             T t = default(T);
@@ -288,7 +288,7 @@ namespace TikTokBrowse.Hubstudio
             }
             return t;
         }
-        
+
         private Task<T> JsonRequestAsync<T>(string url, string body = null, string responseToken = null, string method = "POST")
         {
             return Task.Run<T>(() =>
@@ -302,8 +302,8 @@ namespace TikTokBrowse.Hubstudio
             ChromeOptions chromeOptions = new ChromeOptions();
             chromeOptions.BinaryLocation = web.Data.BrowserPath;
             chromeOptions.DebuggerAddress = $"127.0.0.1:{web.Data.DebuggingPort}";
-        
-            // 关闭黑窗
+
+
             ChromeDriverService chromeDriverService = ChromeDriverService.CreateDefaultService(Path.GetDirectoryName(web.Data.Webdriver));
             chromeDriverService.HideCommandPromptWindow = true;
             ChromeDriver chromeDriver = new ChromeDriver(chromeDriverService, chromeOptions);
@@ -322,22 +322,22 @@ namespace TikTokBrowse.Hubstudio
         }
         public Pix GetAreaHolder(string containerCode)
         {
-            int i, j=0;
+            int i, j = 0;
             for (i = 0; i < _screenCount; i++)
             {
                 for (j = 0; j < _screenContainerCount; j++)
                 {
-                    if( _workArea[i][j].Equals(containerCode))
+                    if (_workArea[i][j].Equals(containerCode))
                     {
                         break;
                     }
                 }
-                if(j != _screenContainerCount)
+                if (j != _screenContainerCount)
                 {
                     break;
                 }
             }
-            if( i < _screenCount && j < _screenContainerCount)
+            if (i < _screenCount && j < _screenContainerCount)
             {
                 return new Pix()
                 {
@@ -353,11 +353,11 @@ namespace TikTokBrowse.Hubstudio
         }
         public int GetAvailableIndex(int screenNumber)
         {
-            if( screenNumber <= _screenCount)
+            if (screenNumber <= _screenCount)
             {
                 Rectangle screenArea = Screen.AllScreens[screenNumber].WorkingArea;
                 int i;
-                for ( i = _workArea[screenNumber].Length -1; i >=0 ; i--)
+                for (i = _workArea[screenNumber].Length - 1; i >= 0; i--)
                 {
                     if (string.IsNullOrWhiteSpace(_workArea[screenNumber][i]))
                     {
@@ -381,7 +381,7 @@ namespace TikTokBrowse.Hubstudio
         {
             return GetRectangle(screenNumber, index, new Size(600, 900));
         }
-        public Rectangle GetRectangle(int screenNumber, int index, Size size) 
+        public Rectangle GetRectangle(int screenNumber, int index, Size size)
         {
             if (screenNumber <= _screenCount)
             {
@@ -398,7 +398,7 @@ namespace TikTokBrowse.Hubstudio
 
         public void SingleWorks(string code, ActuatorEventDelegate actuator)
         {
-            ThreadPool.QueueUserWorkItem((status)=> 
+            ThreadPool.QueueUserWorkItem((status) =>
             {
                 try
                 {
@@ -421,15 +421,15 @@ namespace TikTokBrowse.Hubstudio
             ThreadPool.QueueUserWorkItem((status) =>
             {
                 bool isContinue = false;
-                int okCount= 0;
+                int okCount = 0;
                 int noSuchElementCount = 0;
                 do
                 {
                     try
                     {
                         okCount++;
-                        actuator?.Invoke(new TikTokActuator(code, _workStatusInfo[code].Driver), 
-                            ref isContinue, 
+                        actuator?.Invoke(new TikTokActuator(code, _workStatusInfo[code].Driver),
+                            ref isContinue,
                             ref okCount,
                             ref noSuchElementCount);
                         noSuchElementCount = 0;

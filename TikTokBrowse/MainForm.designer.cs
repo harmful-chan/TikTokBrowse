@@ -29,9 +29,27 @@ namespace TikTokBrowse
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.panel1 = new System.Windows.Forms.Panel();
             this.gird = new System.Windows.Forms.DataGridView();
+            this.选择 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.序号 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.环境ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.环境名称 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.代理状态 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.窗口 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.环境状态 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.进度 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.博主 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.粉丝数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LIKE数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.评论数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.标签 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.行为 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.发表评论 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.视频路径 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.上传进度 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.视频标题 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel2 = new System.Windows.Forms.Panel();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -55,6 +73,7 @@ namespace TikTokBrowse
             this.btnJump = new System.Windows.Forms.Button();
             this.btnCloseWeb = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.button3 = new System.Windows.Forms.Button();
             this.cbTitleCategory = new System.Windows.Forms.ComboBox();
             this.button4 = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
@@ -65,24 +84,6 @@ namespace TikTokBrowse
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lbWait = new System.Windows.Forms.ToolStripStatusLabel();
             this.lbLog = new System.Windows.Forms.ToolStripStatusLabel();
-            this.选择 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.序号 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.环境ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.环境名称 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.代理状态 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.窗口 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.环境状态 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.进度 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.博主 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.粉丝数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LIKE数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.评论数 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.标签 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.行为 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.发表评论 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.视频路径 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.上传进度 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.视频标题 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gird)).BeginInit();
             this.panel2.SuspendLayout();
@@ -149,6 +150,180 @@ namespace TikTokBrowse
             this.gird.MouseLeave += new System.EventHandler(this.gird_MouseLeave);
             this.gird.MouseUp += new System.Windows.Forms.MouseEventHandler(this.gird_MouseUp);
             // 
+            // 选择
+            // 
+            this.选择.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.选择.DataPropertyName = "IsChoose";
+            this.选择.FalseValue = "false";
+            this.选择.Frozen = true;
+            this.选择.HeaderText = "#";
+            this.选择.Name = "选择";
+            this.选择.ReadOnly = true;
+            this.选择.TrueValue = "true";
+            this.选择.Width = 20;
+            // 
+            // 序号
+            // 
+            this.序号.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.序号.DataPropertyName = "Index";
+            this.序号.Frozen = true;
+            this.序号.HeaderText = "#";
+            this.序号.Name = "序号";
+            this.序号.ReadOnly = true;
+            this.序号.Width = 20;
+            // 
+            // 环境ID
+            // 
+            this.环境ID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.环境ID.DataPropertyName = "ContainerCode";
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.White;
+            this.环境ID.DefaultCellStyle = dataGridViewCellStyle3;
+            this.环境ID.FillWeight = 104.8951F;
+            this.环境ID.Frozen = true;
+            this.环境ID.HeaderText = "环境ID";
+            this.环境ID.Name = "环境ID";
+            this.环境ID.ReadOnly = true;
+            this.环境ID.Width = 80;
+            // 
+            // 环境名称
+            // 
+            this.环境名称.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.环境名称.DataPropertyName = "ContainerName";
+            this.环境名称.FillWeight = 95.1049F;
+            this.环境名称.Frozen = true;
+            this.环境名称.HeaderText = "环境名称";
+            this.环境名称.Name = "环境名称";
+            this.环境名称.ReadOnly = true;
+            this.环境名称.Width = 160;
+            // 
+            // 代理状态
+            // 
+            this.代理状态.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.代理状态.DataPropertyName = "ProxyStatus";
+            this.代理状态.Frozen = true;
+            this.代理状态.HeaderText = "代理状态";
+            this.代理状态.Name = "代理状态";
+            this.代理状态.ReadOnly = true;
+            this.代理状态.Width = 80;
+            // 
+            // 窗口
+            // 
+            this.窗口.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.窗口.DataPropertyName = "ContainerPosition";
+            this.窗口.Frozen = true;
+            this.窗口.HeaderText = "窗口";
+            this.窗口.Name = "窗口";
+            this.窗口.ReadOnly = true;
+            this.窗口.Width = 70;
+            // 
+            // 环境状态
+            // 
+            this.环境状态.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.环境状态.DataPropertyName = "ContainerStatus";
+            this.环境状态.Frozen = true;
+            this.环境状态.HeaderText = "环境状态";
+            this.环境状态.Name = "环境状态";
+            this.环境状态.ReadOnly = true;
+            this.环境状态.Width = 150;
+            // 
+            // 进度
+            // 
+            this.进度.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.进度.DataPropertyName = "VideoProgress";
+            this.进度.HeaderText = "进度";
+            this.进度.Name = "进度";
+            this.进度.ReadOnly = true;
+            this.进度.Width = 70;
+            // 
+            // 博主
+            // 
+            this.博主.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.博主.DataPropertyName = "BloggerName";
+            this.博主.HeaderText = "博主";
+            this.博主.Name = "博主";
+            this.博主.ReadOnly = true;
+            this.博主.Width = 70;
+            // 
+            // 粉丝数
+            // 
+            this.粉丝数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.粉丝数.DataPropertyName = "FollowerNumber";
+            this.粉丝数.HeaderText = "粉丝数";
+            this.粉丝数.Name = "粉丝数";
+            this.粉丝数.ReadOnly = true;
+            this.粉丝数.Width = 70;
+            // 
+            // LIKE数
+            // 
+            this.LIKE数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.LIKE数.DataPropertyName = "LikeNumber";
+            this.LIKE数.HeaderText = "LIKE数";
+            this.LIKE数.Name = "LIKE数";
+            this.LIKE数.ReadOnly = true;
+            this.LIKE数.Width = 70;
+            // 
+            // 评论数
+            // 
+            this.评论数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.评论数.DataPropertyName = "CommentNumber";
+            this.评论数.HeaderText = "评论数";
+            this.评论数.Name = "评论数";
+            this.评论数.ReadOnly = true;
+            this.评论数.Width = 70;
+            // 
+            // 标签
+            // 
+            this.标签.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.标签.DataPropertyName = "Tag";
+            this.标签.HeaderText = "标签";
+            this.标签.Name = "标签";
+            this.标签.ReadOnly = true;
+            this.标签.Width = 150;
+            // 
+            // 行为
+            // 
+            this.行为.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.行为.DataPropertyName = "Behavior";
+            this.行为.HeaderText = "行为";
+            this.行为.Name = "行为";
+            this.行为.ReadOnly = true;
+            this.行为.Width = 150;
+            // 
+            // 发表评论
+            // 
+            this.发表评论.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.发表评论.HeaderText = "发表评论";
+            this.发表评论.MinimumWidth = 100;
+            this.发表评论.Name = "发表评论";
+            this.发表评论.ReadOnly = true;
+            // 
+            // 视频路径
+            // 
+            this.视频路径.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.视频路径.DataPropertyName = "VideoFileName";
+            this.视频路径.HeaderText = "视频路径";
+            this.视频路径.Name = "视频路径";
+            this.视频路径.ReadOnly = true;
+            this.视频路径.Width = 200;
+            // 
+            // 上传进度
+            // 
+            this.上传进度.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.上传进度.DataPropertyName = "VideoUploadBar";
+            this.上传进度.HeaderText = "上传进度";
+            this.上传进度.Name = "上传进度";
+            this.上传进度.ReadOnly = true;
+            this.上传进度.Width = 80;
+            // 
+            // 视频标题
+            // 
+            this.视频标题.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.视频标题.DataPropertyName = "VideoTitle";
+            this.视频标题.HeaderText = "视频标题";
+            this.视频标题.Name = "视频标题";
+            this.视频标题.ReadOnly = true;
+            this.视频标题.Width = 200;
+            // 
             // panel2
             // 
             this.panel2.Controls.Add(this.txtLog);
@@ -170,6 +345,7 @@ namespace TikTokBrowse
             this.txtLog.Size = new System.Drawing.Size(887, 206);
             this.txtLog.TabIndex = 9;
             this.txtLog.Text = "123456789";
+            this.txtLog.TextChanged += new System.EventHandler(this.txtLog_TextChanged);
             // 
             // tabControl1
             // 
@@ -228,6 +404,7 @@ namespace TikTokBrowse
             this.panFunc.Name = "panFunc";
             this.panFunc.Size = new System.Drawing.Size(162, 175);
             this.panFunc.TabIndex = 0;
+            this.panFunc.Paint += new System.Windows.Forms.PaintEventHandler(this.panFunc_Paint);
             // 
             // btnAutoWork
             // 
@@ -390,6 +567,7 @@ namespace TikTokBrowse
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.button3);
             this.tabPage2.Controls.Add(this.cbTitleCategory);
             this.tabPage2.Controls.Add(this.button4);
             this.tabPage2.Controls.Add(this.label2);
@@ -403,6 +581,16 @@ namespace TikTokBrowse
             this.tabPage2.Text = "视频上传";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(170, 86);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 11;
+            this.button3.Text = "Upload";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
             // cbTitleCategory
             // 
             this.cbTitleCategory.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -411,6 +599,7 @@ namespace TikTokBrowse
             this.cbTitleCategory.Name = "cbTitleCategory";
             this.cbTitleCategory.Size = new System.Drawing.Size(180, 20);
             this.cbTitleCategory.TabIndex = 10;
+            this.cbTitleCategory.SelectedIndexChanged += new System.EventHandler(this.cbTitleCategory_SelectedIndexChanged);
             // 
             // button4
             // 
@@ -420,6 +609,7 @@ namespace TikTokBrowse
             this.button4.TabIndex = 9;
             this.button4.Text = "上传";
             this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // label2
             // 
@@ -438,6 +628,7 @@ namespace TikTokBrowse
             this.button2.TabIndex = 3;
             this.button2.Text = "填充标题";
             this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // button1
             // 
@@ -490,180 +681,6 @@ namespace TikTokBrowse
             this.lbLog.Name = "lbLog";
             this.lbLog.Size = new System.Drawing.Size(68, 17);
             this.lbLog.Text = "正常使用中";
-            // 
-            // 选择
-            // 
-            this.选择.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.选择.DataPropertyName = "IsChoose";
-            this.选择.FalseValue = "false";
-            this.选择.Frozen = true;
-            this.选择.HeaderText = "#";
-            this.选择.Name = "选择";
-            this.选择.ReadOnly = true;
-            this.选择.TrueValue = "true";
-            this.选择.Width = 20;
-            // 
-            // 序号
-            // 
-            this.序号.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.序号.DataPropertyName = "Index";
-            this.序号.Frozen = true;
-            this.序号.HeaderText = "#";
-            this.序号.Name = "序号";
-            this.序号.ReadOnly = true;
-            this.序号.Width = 20;
-            // 
-            // 环境ID
-            // 
-            this.环境ID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.环境ID.DataPropertyName = "ContainerCode";
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.White;
-            this.环境ID.DefaultCellStyle = dataGridViewCellStyle4;
-            this.环境ID.FillWeight = 104.8951F;
-            this.环境ID.Frozen = true;
-            this.环境ID.HeaderText = "环境ID";
-            this.环境ID.Name = "环境ID";
-            this.环境ID.ReadOnly = true;
-            this.环境ID.Width = 80;
-            // 
-            // 环境名称
-            // 
-            this.环境名称.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.环境名称.DataPropertyName = "ContainerName";
-            this.环境名称.FillWeight = 95.1049F;
-            this.环境名称.Frozen = true;
-            this.环境名称.HeaderText = "环境名称";
-            this.环境名称.Name = "环境名称";
-            this.环境名称.ReadOnly = true;
-            this.环境名称.Width = 160;
-            // 
-            // 代理状态
-            // 
-            this.代理状态.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.代理状态.DataPropertyName = "ProxyStatus";
-            this.代理状态.Frozen = true;
-            this.代理状态.HeaderText = "代理状态";
-            this.代理状态.Name = "代理状态";
-            this.代理状态.ReadOnly = true;
-            this.代理状态.Width = 80;
-            // 
-            // 窗口
-            // 
-            this.窗口.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.窗口.DataPropertyName = "ContainerPosition";
-            this.窗口.Frozen = true;
-            this.窗口.HeaderText = "窗口";
-            this.窗口.Name = "窗口";
-            this.窗口.ReadOnly = true;
-            this.窗口.Width = 70;
-            // 
-            // 环境状态
-            // 
-            this.环境状态.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.环境状态.DataPropertyName = "ContainerStatus";
-            this.环境状态.Frozen = true;
-            this.环境状态.HeaderText = "环境状态";
-            this.环境状态.Name = "环境状态";
-            this.环境状态.ReadOnly = true;
-            this.环境状态.Width = 150;
-            // 
-            // 进度
-            // 
-            this.进度.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.进度.DataPropertyName = "VideoProgress";
-            this.进度.HeaderText = "进度";
-            this.进度.Name = "进度";
-            this.进度.ReadOnly = true;
-            this.进度.Width = 70;
-            // 
-            // 博主
-            // 
-            this.博主.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.博主.DataPropertyName = "BloggerName";
-            this.博主.HeaderText = "博主";
-            this.博主.Name = "博主";
-            this.博主.ReadOnly = true;
-            this.博主.Width = 70;
-            // 
-            // 粉丝数
-            // 
-            this.粉丝数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.粉丝数.DataPropertyName = "FollowerNumber";
-            this.粉丝数.HeaderText = "粉丝数";
-            this.粉丝数.Name = "粉丝数";
-            this.粉丝数.ReadOnly = true;
-            this.粉丝数.Width = 70;
-            // 
-            // LIKE数
-            // 
-            this.LIKE数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LIKE数.DataPropertyName = "LikeNumber";
-            this.LIKE数.HeaderText = "LIKE数";
-            this.LIKE数.Name = "LIKE数";
-            this.LIKE数.ReadOnly = true;
-            this.LIKE数.Width = 70;
-            // 
-            // 评论数
-            // 
-            this.评论数.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.评论数.DataPropertyName = "CommentNumber";
-            this.评论数.HeaderText = "评论数";
-            this.评论数.Name = "评论数";
-            this.评论数.ReadOnly = true;
-            this.评论数.Width = 70;
-            // 
-            // 标签
-            // 
-            this.标签.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.标签.DataPropertyName = "Tag";
-            this.标签.HeaderText = "标签";
-            this.标签.Name = "标签";
-            this.标签.ReadOnly = true;
-            this.标签.Width = 150;
-            // 
-            // 行为
-            // 
-            this.行为.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.行为.DataPropertyName = "Behavior";
-            this.行为.HeaderText = "行为";
-            this.行为.Name = "行为";
-            this.行为.ReadOnly = true;
-            this.行为.Width = 150;
-            // 
-            // 发表评论
-            // 
-            this.发表评论.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.发表评论.HeaderText = "发表评论";
-            this.发表评论.MinimumWidth = 100;
-            this.发表评论.Name = "发表评论";
-            this.发表评论.ReadOnly = true;
-            // 
-            // 视频路径
-            // 
-            this.视频路径.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.视频路径.DataPropertyName = "VideoFileName";
-            this.视频路径.HeaderText = "视频路径";
-            this.视频路径.Name = "视频路径";
-            this.视频路径.ReadOnly = true;
-            this.视频路径.Width = 200;
-            // 
-            // 上传进度
-            // 
-            this.上传进度.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.上传进度.DataPropertyName = "VideoUploadBar";
-            this.上传进度.HeaderText = "上传进度";
-            this.上传进度.Name = "上传进度";
-            this.上传进度.ReadOnly = true;
-            this.上传进度.Width = 80;
-            // 
-            // 视频标题
-            // 
-            this.视频标题.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.视频标题.DataPropertyName = "VideoTitle";
-            this.视频标题.HeaderText = "视频标题";
-            this.视频标题.Name = "视频标题";
-            this.视频标题.ReadOnly = true;
-            this.视频标题.Width = 200;
             // 
             // MainForm
             // 
@@ -747,6 +764,7 @@ namespace TikTokBrowse
         private System.Windows.Forms.DataGridViewTextBoxColumn 视频路径;
         private System.Windows.Forms.DataGridViewTextBoxColumn 上传进度;
         private System.Windows.Forms.DataGridViewTextBoxColumn 视频标题;
+        private System.Windows.Forms.Button button3;
     }
 }
 

@@ -65,7 +65,7 @@ namespace TikTokBrowse.Helper
                     return null;
 
                 string day = DateTime.Now.ToString("yyyyMMdd");
-                return Directory.GetFiles(videoDir, day);
+                return Directory.GetFiles(videoDir, day+"*.mp4");
             }
 
         }

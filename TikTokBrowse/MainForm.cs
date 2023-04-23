@@ -42,7 +42,7 @@ namespace TikTokBrowse
         private readonly string[] 视频上传 = { "视频路径", "上传进度", "视频标题" };
 
         //private readonly int[] _screenSqe = new int[] { 0, 3, 1, 2 };
-        private readonly int[] _screenSqe = new int[] { 1, 3, 1, 2 };
+        private readonly int[] _screenSqe = new int[] {3, 3, 1, 2 };
         public MainForm()
         {            
             //设置窗体的双缓冲
@@ -368,9 +368,10 @@ namespace TikTokBrowse
                         va.ContainerStatus = "打开中...";
 
                         Hubstudio.Models.Container[] containers = await _client.GetContainersByCodeAsync(va.ContainerCode);
-                        string ret = await NetworkHelper.TcpTestAsync(containers[0].ProxyHost, int.Parse(containers[0].ProxyPort));
-                        if (ret.Equals(NetworkResultTypes.Success) && await _client.OpenWebAsync(va.ContainerCode, area))
-                        {
+                        //string ret = await NetworkHelper.TcpTestAsync(containers[0].ProxyHost, int.Parse(containers[0].ProxyPort));
+                        //if (ret.Equals(NetworkResultTypes.Success) && await _client.OpenWebAsync(va.ContainerCode, area))
+                        if (await _client.OpenWebAsync(va.ContainerCode, area))
+                            {
                             _client.SetAreaHolder(pix, va.ContainerCode);
                             int i = 0;
                             for (; i < _screenSqe.Length; i++)
@@ -424,7 +425,7 @@ namespace TikTokBrowse
             }
             catch(Exception ex)
             {
-
+                 
             }
 
             isContinue = true;
@@ -470,7 +471,9 @@ namespace TikTokBrowse
                 case ActionTypes.EXTRACT_COMMENTS_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = "提取评论完成"}"); break;
                 case ActionTypes.ELEMENT_NOT_FOUND: WindowsLog(id, $"{_rowData[id].ContainerStatus = _rowData[id].ContainerStatus + "_ELEMENT_NOT_FOUND"}"); break;
                 case ActionTypes.ERROR: WindowsLog(id, $"{_rowData[id].ContainerStatus = _rowData[id].ContainerStatus + "_ERROR"}"); break;
- 
+                case ActionTypes.UPLOAD_VIDEO: WindowsLog(id, $"{_rowData[id].ContainerStatus = _rowData[id].ContainerStatus + "开始上传视频"}"); break;
+                case ActionTypes.UPLOAD_VIDEO_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = _rowData[id].ContainerStatus + "上传视频完成"}"); break;
+
                 default: break;
             }
         }
@@ -529,6 +532,7 @@ namespace TikTokBrowse
                 _rowData[id].FollowerNumber = bd.BloggerFollwers;
                 _rowData[id].LikeNumber = bd.LikeNumber;
                 _rowData[id].CommentNumber = bd.CommentNumber;
+                _rowData[id].Tag = string.Join("", bd.TitleTags);
             }
         }
 
@@ -716,7 +720,9 @@ namespace TikTokBrowse
         {
             RunTrace(ActionTypes.BIG_SCREEN_MODE, ActionTypes.BIG_SCREEN_MODE_FINISH, (actuator) =>
             {
-                actuator.BigScreenMode();
+
+                   actuator.BigScreenMode();
+
             });
         }
 
@@ -725,7 +731,9 @@ namespace TikTokBrowse
 
             RunTrace(ActionTypes.EXIT_BIG_SCREEN_MODE, ActionTypes.EXIT_BIG_SCREEN_MODE_FINISH, (actuator) =>
             {
-                actuator.ExitBigScreenMode();
+
+                    actuator.ExitBigScreenMode();
+
             });
         }
 
@@ -759,7 +767,7 @@ namespace TikTokBrowse
             RunTrace(ActionTypes.UPDATE_PLAY_BAR, ActionTypes.UPDATE_PLAY_BAR_FINISH, (actuator) =>
             {
                 string bar = actuator.GetPlayBarData();
-                UploadBloggerData(actuator.Id, bar);
+                UploadVideoProgress(actuator.Id, bar);
             });
         }
 
@@ -970,6 +978,43 @@ namespace TikTokBrowse
 
             } while (++i < 10);
 
+
+        }
+
+        private void txtLog_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cbTitleCategory_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.UPLOAD_VIDEO, ActionTypes.UPLOAD_VIDEO_FINISH, (actuator) =>
+            {
+                actuator.ClickPost(_client);
+            });
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.JUMP_WEBSITE, ActionTypes.JUMP_WEBSITE_FINISH, (actuator) =>
+            {
+
+                actuator.GoUpload( );
+            });
+        }
+
+        private void panFunc_Paint(object sender, PaintEventArgs e)
+        {
 
         }
     }
