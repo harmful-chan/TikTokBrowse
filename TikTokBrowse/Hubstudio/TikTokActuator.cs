@@ -14,9 +14,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using TikTokBrowse.Helper;
 using TikTokBrowse.Hubstudio.Extensions;
 using TikTokBrowse.Hubstudio.Models;
+using TikTokBrowse.Models;
+using Keys = OpenQA.Selenium.Keys;
 
 namespace TikTokBrowse.Hubstudio
 {
@@ -158,11 +161,11 @@ namespace TikTokBrowse.Hubstudio
             Random random = new Random();
             int titleTagsIndex = random.Next(0, fileContent.Length - 1);
             string titleTags = fileContent[titleTagsIndex];
-            int startIndex = titleTags.IndexOf('"');
+            /*int startIndex = titleTags.IndexOf('"');
             int endIndex = titleTags.LastIndexOf('"');
-            string content = titleTags.Substring(startIndex + 1, endIndex - startIndex - 1);
+            string content = titleTags.Substring(startIndex + 1, endIndex - startIndex - 1);*/
 
-            return content;
+            return titleTags;
         }
 
         public bool MyUpload(string videoPath)
@@ -175,32 +178,49 @@ namespace TikTokBrowse.Hubstudio
             // 找到上传的input标签，上传视频，和填写标题，等到post按钮可以点击就表示视频加载完成
             IWebElement postElement = null;
             bool PostEnabled = false;
+
             do
-            {
-                var inputElements = _driver.FindElements(By.XPath("//input[@accept='video/*']"));
-                if (inputElements.Count > 0)
-                {
-                    inputElements[0].SendKeys(videoPath);
-                    var titleTagsElement = _driver.FindElement(By.XPath("//*[@data-text='true']"));
-                    //jsExecutor.ExecuteScript($"arguments[0].textContent = '{content}';", titleTagsElement);
-                    Thread.Sleep(TimeSpan.FromSeconds(1));
-                    titleTagsElement.SendKeys(titleTags);
-                    Thread.Sleep(TimeSpan.FromSeconds(2));
-                }
-                postElement = _driver.FindElement(By.XPath("//button[string()='Post']"));
-                PostEnabled = postElement.Enabled;
-            } while (!PostEnabled);
-            // 点击Post按钮上传，等待上传完成，若上传完成，则会出现Upload another video按钮，然后点击
-            postElement.Click();
-            int speed = 0;
-            while (speed < 60)
             {
                 try
                 {
-                     _driver.FindElement(By.XPath("//*[string()='Upload another video']")).Click();
+                    var inputElements = _driver.FindElements(By.XPath("//input[@accept='video/*']"));
+                    if (inputElements.Count > 0)
+                    {
+                        inputElements[0].SendKeys(videoPath);
+                        var titleTagsElement = _driver.FindElement(By.XPath("//*[@data-text='true']"));
+                        Thread.Sleep(TimeSpan.FromSeconds(1));
+                        string isHadTitle = titleTagsElement.GetAttribute("textContent");
+                        if (string.IsNullOrEmpty(isHadTitle))
+                        {
+                            titleTagsElement.SendKeys(titleTags);
+                        }
+                        Thread.Sleep(TimeSpan.FromSeconds(2));
+                    }
+                    postElement = _driver.FindElement(By.XPath("//button[string()='Post']"));
+                    PostEnabled = postElement.Enabled;
+                }
+                catch 
+                { 
+                    PostEnabled = false; 
+                }
+
+            } while (!PostEnabled);
+            // 点击Post按钮上传，等待上传完成，若上传完成，则会出现Upload another video按钮，然后点击
+           postElement.Click();
+            int speed = 0;
+            while (speed < 120)
+            {
+                try
+                {
+                    _driver.FindElement(By.XPath("//*[string()='Upload another video']")).Click();
                     return true;
                 }
-                catch { speed++; }
+                catch{ speed++; }
+                try
+                {
+                    postElement.Click();
+                }
+                catch { }
             }
 
             return false;
@@ -229,18 +249,138 @@ namespace TikTokBrowse.Hubstudio
             }
             finally
             {
-                //string dir = _client.GetContainerDirectory(_containerCode);
-                string dir = @"Y:\Hubstudio\US成人用品001";
-                string[] fileNames = new VideoHelper().GetDailyVideoFileName(dir);
-
-                int videoPathIndex = VideopathDict.TryGetValue(_containerCode, out int index) ? index : 0;
-
-                if (MyUpload(fileNames[videoPathIndex]))
+                string VideoDir = _client.GetContainerDirectory(_containerCode);
+                //string VideoDir = @"Y:\Hubstudio\US成人用品001";
+                string[] fileNames = new VideoHelper().GetDailyVideoFileName(VideoDir);
+                string containerName = VideoDir.Split('\\')[2];
+                try
                 {
-                    VideopathDict.AddOrUpdate(_containerCode, 1, (key, OlderValue) => OlderValue + 1);
+                    for (int i = 0; i < fileNames.Length; i++)
+                    {
+                        int videoPathIndex = VideopathDict.TryGetValue(_containerCode, out int index) ? index : 0;
+                        if (MyUpload(fileNames[videoPathIndex]))
+                        {
+                            VideopathDict.AddOrUpdate(_containerCode, 1, (key, OlderValue) => OlderValue + 1);
+                        }
+                    }
+                }
+                catch
+                {
+                    int PostedCount = VideopathDict.TryGetValue(_containerCode, out int j) ? j : 0;
+                    if (PostedCount < fileNames.Length)
+                    {
+                        MessageBox.Show($"只上传了 {PostedCount} 个视频！再次点击《上传》 可继续上传", containerName);
+                    }
+                }
+                MessageBox.Show($"已经上传完所有的视频！x {fileNames.Length}", containerName);
+                //_driver.SwitchTo().DefaultContent();
+                _driver.Navigate().GoToUrl("https://www.tiktok.com/en?lang=en");
+            }
+        }
+
+        // 停止刷视频
+        public void StopExecute()
+        {
+            _driver.Navigate().GoToUrl("https://www.tiktok.com/en?lang=en");
+        }
+
+        // 自动刷视频
+        public void AutoExecute(string TitleOrTags, ConcurrentDictionary<string, Point> PositionDict)
+        {
+            IJavaScriptExecutor js = (IJavaScriptExecutor)_driver;
+            Actions actions = new Actions(_driver);
+            string CommentDir = @"Y:\自定义评论.txt";
+
+            // 将浏览器窗口移动到指定位置
+            _driver.Manage().Window.Size = new Size(1150, 800);
+            _driver.Manage().Window.Position = PositionDict[_containerCode];
+
+            _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+            // 输入标题或标签
+            IWebElement SearchInputElement = _driver.FindElement(By.XPath("//input[@data-e2e='search-user-input']"));
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+            SearchInputElement.SendKeys(TitleOrTags);
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+            IWebElement SearchElement = _driver.FindElement(By.XPath("//*[@data-e2e='search-button']"));
+            new Actions(_driver).Click(SearchElement).Perform();
+            //Thread.Sleep(TimeSpan.FromSeconds(1));
+            //_driver.FindElement(By.XPath("//*[@id='tabs-0-tab-search_video']")).Click();
+            Thread.Sleep(TimeSpan.FromSeconds(3));
+
+            int step = 0;
+            while (step < 5)
+            {
+                try
+                {
+                    actions.SendKeys(Keys.End).Perform();
+                    Thread.Sleep(TimeSpan.FromSeconds(1));
+                    _driver.FindElement(By.XPath("//*[@data-e2e='search-load-more']")).Click();
+                    Thread.Sleep(TimeSpan.FromSeconds(2));
+                }
+                catch
+                {
+
+                }
+                step++;
+            }
+            // 开始自动刷视频
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+            actions.SendKeys(Keys.Home).Perform();
+            Thread.Sleep(TimeSpan.FromSeconds(2));
+            // 点击第一个视频
+            _driver.FindElement(By.XPath("//*[@data-e2e='search-top-video-title']/../../following-sibling::div[1]")).Click();
+
+            bool flag = true;
+            while (flag)
+            {
+                try
+                {
+                    string comment = GetTitleTags(CommentDir);
+                    Thread.Sleep(TimeSpan.FromSeconds(2));
+                    //查看是否已经点赞
+                    var isLiked = _driver.FindElements(By.XPath("//*[@aria-pressed='true']"));
+                    if(isLiked.Count == 0)
+                    {
+                        // 点击关注
+                        _driver.FindElement(By.XPath("//*[@data-e2e='browse-like-icon']")).Click();
+                    }
+                    // 写入评论
+                    Thread.Sleep(TimeSpan.FromSeconds(1));
+                    _driver.FindElement(By.XPath("//*[@data-text='true']")).SendKeys(comment);
+                    Thread.Sleep(TimeSpan.FromSeconds(2));
+                    // 发送评论
+                    _driver.FindElement(By.XPath("//*[@data-e2e='comment-post']")).Click();
+                    Thread.Sleep(TimeSpan.FromSeconds(2));
+                    // 下一个视频
+                    _driver.FindElement(By.XPath("//button[@data-e2e='arrow-right']")).Click();
+                    // 如果弹出 没有评论完成是否离开见面的提示，则点击继续评价
+                    var LeavePrompt = _driver.FindElements(By.XPath("//div[text()='Keep editing']"));
+                    if (LeavePrompt.Count > 0)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(1));
+                        LeavePrompt[0].Click();
+                        _driver.FindElement(By.XPath("//*[@data-e2e='comment-post']")).Click();
+                    }
+                }
+                catch
+                {
+                    var NextBotton = _driver.FindElement(By.XPath("//button[@data-e2e='arrow-right']"));
+                    if (NextBotton.Enabled)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(1));
+                        NextBotton.Click();
+                    }
+                    else
+                    {
+                        flag = false;
+                        MessageBox.Show("看完所有视频！", "提示");
+                        _driver.FindElement(By.XPath("//*[@data-e2e='browse-close']")).Click();
+                    }
                 }
             }
         }
+
+
         // 通用模式
         public void NextVideo()
         {
@@ -443,7 +583,6 @@ namespace TikTokBrowse.Hubstudio
             {
                 // 点击正在播放的视频
                 _driver.FindElement(By.XPath("//*[starts-with(@id, 'xgwrapper')]/video")).Click();
-
             }
         }
         public void ExitBigScreenMode()

@@ -474,6 +474,9 @@ namespace TikTokBrowse
                 case ActionTypes.UPLOAD_VIDEO: WindowsLog(id, $"{_rowData[id].ContainerStatus = _rowData[id].ContainerStatus + "开始上传视频"}"); break;
                 case ActionTypes.UPLOAD_VIDEO_FINISH: WindowsLog(id, $"{_rowData[id].ContainerStatus = _rowData[id].ContainerStatus + "上传视频完成"}"); break;
 
+                case ActionTypes.AUTOMATICALLY_SCROLLING_VIDEO: WindowsLog(id, $"{_rowData[id].ContainerStatus = "开始自动刷视频"}"); break;
+                case ActionTypes.STOP_AUTOMATICALLY_SCROLLING_VIDEO: WindowsLog(id, $"{_rowData[id].ContainerStatus = "停止自动刷视频"}"); break;
+
                 default: break;
             }
         }
@@ -904,6 +907,8 @@ namespace TikTokBrowse
                 MessageBox.Show("配置文件读取错误，请选择正确配置文件路径，重新打开应用", null, MessageBoxButtons.OKCancel);
                 Application.Exit();
             }
+            // 设置养号的默认标题是 sex toy
+            InputTitleOrTags.Text = "sex toy";
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
@@ -1016,6 +1021,50 @@ namespace TikTokBrowse
         private void panFunc_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            ConcurrentDictionary<string, Point> PositionDict = new ConcurrentDictionary<string, Point>();
+            List<RowData> Containers = GetSortCheckedRowDataList();
+
+            Screen[] screens = Screen.AllScreens;
+            Screen screen = screens[1];
+
+            for (int i = 0; i < Containers.Count; i++)
+            {
+                int x = screen.Bounds.Left + i * 40;
+                int y = screen.Bounds.Top + i * 40;
+                PositionDict.TryAdd(Containers[i].ContainerCode, new Point(x, y));
+            }
+            RunTrace(ActionTypes.BIG_SCREEN_MODE, ActionTypes.BIG_SCREEN_MODE_FINISH, (actuator) =>
+            {
+                string TitleOrTags = InputTitleOrTags.Text;
+                actuator.AutoExecute(TitleOrTags, PositionDict);
+            });
+        }
+
+        private void InputTitleOrTags_Enter(object sender, EventArgs e)
+        {
+            InputTitleOrTags.Text = "";
+        }
+
+        private void InputTitleOrTags_Leave(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            RunTrace(ActionTypes.BIG_SCREEN_MODE, ActionTypes.BIG_SCREEN_MODE_FINISH, (actuator) =>
+            {
+                actuator.StopExecute();
+            });
         }
     }
 }

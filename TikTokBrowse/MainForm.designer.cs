@@ -29,7 +29,7 @@ namespace TikTokBrowse
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.panel1 = new System.Windows.Forms.Panel();
             this.gird = new System.Windows.Forms.DataGridView();
             this.选择 = new System.Windows.Forms.DataGridViewCheckBoxColumn();
@@ -79,11 +79,16 @@ namespace TikTokBrowse
             this.label2 = new System.Windows.Forms.Label();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.button5 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.InputTitleOrTags = new System.Windows.Forms.TextBox();
             this.panel3 = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.lbWait = new System.Windows.Forms.ToolStripStatusLabel();
             this.lbLog = new System.Windows.Forms.ToolStripStatusLabel();
+            this.button6 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gird)).BeginInit();
             this.panel2.SuspendLayout();
@@ -91,6 +96,7 @@ namespace TikTokBrowse
             this.tabPage1.SuspendLayout();
             this.panFunc.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -176,8 +182,8 @@ namespace TikTokBrowse
             // 
             this.环境ID.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
             this.环境ID.DataPropertyName = "ContainerCode";
-            dataGridViewCellStyle3.BackColor = System.Drawing.Color.White;
-            this.环境ID.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
+            this.环境ID.DefaultCellStyle = dataGridViewCellStyle2;
             this.环境ID.FillWeight = 104.8951F;
             this.环境ID.Frozen = true;
             this.环境ID.HeaderText = "环境ID";
@@ -346,11 +352,13 @@ namespace TikTokBrowse
             this.txtLog.TabIndex = 9;
             this.txtLog.Text = "123456789";
             this.txtLog.TextChanged += new System.EventHandler(this.txtLog_TextChanged);
+            this.txtLog.MouseLeave += new System.EventHandler(this.InputTitleOrTags_Leave);
             // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Left;
             this.tabControl1.Location = new System.Drawing.Point(4, 0);
             this.tabControl1.Name = "tabControl1";
@@ -640,6 +648,50 @@ namespace TikTokBrowse
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.button6);
+            this.tabPage3.Controls.Add(this.button5);
+            this.tabPage3.Controls.Add(this.label1);
+            this.tabPage3.Controls.Add(this.InputTitleOrTags);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(421, 180);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "养号";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(329, 24);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(75, 23);
+            this.button5.TabIndex = 2;
+            this.button5.Text = "开始养号";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("微软雅黑", 11F);
+            this.label1.Location = new System.Drawing.Point(20, 27);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(77, 20);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "输入标题 :";
+            this.label1.Click += new System.EventHandler(this.label1_Click);
+            // 
+            // InputTitleOrTags
+            // 
+            this.InputTitleOrTags.Location = new System.Drawing.Point(100, 26);
+            this.InputTitleOrTags.Name = "InputTitleOrTags";
+            this.InputTitleOrTags.Size = new System.Drawing.Size(213, 21);
+            this.InputTitleOrTags.TabIndex = 0;
+            this.InputTitleOrTags.Click += new System.EventHandler(this.InputTitleOrTags_Enter);
+            this.InputTitleOrTags.MouseLeave += new System.EventHandler(this.InputTitleOrTags_Leave);
+            // 
             // panel3
             // 
             this.panel3.Location = new System.Drawing.Point(269, 96);
@@ -682,6 +734,16 @@ namespace TikTokBrowse
             this.lbLog.Size = new System.Drawing.Size(68, 17);
             this.lbLog.Text = "正常使用中";
             // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(329, 65);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(75, 23);
+            this.button6.TabIndex = 3;
+            this.button6.Text = "停止";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -704,6 +766,8 @@ namespace TikTokBrowse
             this.panFunc.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -765,6 +829,11 @@ namespace TikTokBrowse
         private System.Windows.Forms.DataGridViewTextBoxColumn 上传进度;
         private System.Windows.Forms.DataGridViewTextBoxColumn 视频标题;
         private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox InputTitleOrTags;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button6;
     }
 }
 
